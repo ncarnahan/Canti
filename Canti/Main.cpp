@@ -1,8 +1,10 @@
 #include "Common.h"
 #include <SDL.h>
+#include <SDL_image.h>
 #include <iostream>
 #include <Graphics/OpenGL.h>
 #include <Graphics/Shader.h>
+#include <Graphics/Texture.h>
 #include <Graphics/Mesh.h>
 using namespace Graphics;
 
@@ -13,6 +15,7 @@ void Display();
 
 Mesh mesh;
 Shader shader;
+Texture texture;
 
 
 int main(int argc, char **argv)
@@ -44,6 +47,8 @@ int main(int argc, char **argv)
     std::cout << "OpenGL Renderer: " << (char*)glGetString(GL_RENDERER) << std::endl;
     std::cout << "OpenGL Version: " << (char*)glGetString(GL_VERSION) << std::endl;
 
+    IMG_Init(IMG_INIT_JPG | IMG_INIT_PNG);
+
     Init();
 
     while (running)
@@ -62,6 +67,8 @@ int main(int argc, char **argv)
         SDL_GL_SwapWindow(window);
     }
 
+    IMG_Quit();
+
     SDL_GL_DeleteContext(context);
     SDL_DestroyWindow(window);
     SDL_Quit();
@@ -76,6 +83,8 @@ void Init()
 
     mesh.LoadObjFile("Data/Suzanne.obj");
 
+    texture.Load("Data/Texture.png");
+
     glEnable(GL_DEPTH_TEST);
 
     glClearColor(0.1f, 0.1f, 0.1f, 0.0f);
@@ -86,9 +95,9 @@ void Display()
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     shader.Start();
+    texture.Bind();
     mesh.Draw();
-    shader.Stop();
-
+    
     auto error = glGetError();
     if (error != GL_NO_ERROR)
     {

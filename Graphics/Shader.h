@@ -29,6 +29,7 @@ namespace Graphics
         void Start();
         void Stop();
 
+        inline GLint GetUniformLocation(const char* name) { return glGetUniformLocation(program, name); }
         inline GLuint GetProgram() { return program; }
     };
 }
