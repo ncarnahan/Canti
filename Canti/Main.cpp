@@ -6,6 +6,7 @@
 #include <Graphics/Shader.h>
 #include <Graphics/Texture.h>
 #include <Graphics/Mesh.h>
+#include <Graphics/Material.h>
 using namespace Graphics;
 
 
@@ -16,6 +17,8 @@ void Display();
 Mesh mesh;
 Shader shader;
 Texture texture;
+Texture texture2;
+Material material;
 
 
 int main(int argc, char **argv)
@@ -84,6 +87,11 @@ void Init()
     mesh.LoadObjFile("Data/Suzanne.obj");
 
     texture.Load("Data/Texture.png");
+    texture2.Load("Data/Texture2.png");
+
+    material.SetShader(shader);
+    material.SetTexture(shader.GetUniformLocation("tex_diffuse"), texture);
+    material.SetTexture(shader.GetUniformLocation("tex_lightmap"), texture2);
 
     glEnable(GL_DEPTH_TEST);
 
@@ -94,8 +102,9 @@ void Display()
 {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    shader.Start();
-    texture.Bind();
+    material.Start();
+    //shader.Start();
+    //texture.Bind();
     mesh.Draw();
     
     auto error = glGetError();
