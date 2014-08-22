@@ -43,16 +43,16 @@ namespace Math
 
 
         inline float operator[](const size_t i) const
-	    {
-		    assert(i < 3);
-		    return *(&x + i);
-	    }
+        {
+            assert(i < 3);
+            return *(&x + i);
+        }
 
-	    inline float& operator[](const size_t i)
-	    {
-		    assert(i < 3);
-		    return *(&x + i);
-	    }
+        inline float& operator[](const size_t i)
+        {
+            assert(i < 3);
+            return *(&x + i);
+        }
 
 
 
