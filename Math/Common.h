@@ -56,6 +56,12 @@ namespace Math
     {
         return std::tanf(theta * DEG2RAD);
     }
+
+    inline bool FloatEq(float lhs, float rhs)
+    {
+        const float epsilon = 0.000001f;
+        return std::abs(lhs - rhs) < epsilon;
+    }
 }
 
 #endif
