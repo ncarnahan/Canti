@@ -1,8 +1,6 @@
 #ifndef MATH_COMMON_H
 #define MATH_COMMON_H
 
-#define _USE_MATH_DEFINES
-
 #include <cassert>
 #include <cmath>
 
@@ -42,6 +40,21 @@ namespace Math
     {
         assert(high > low);
         return Min(Max(value, low), high);
+    }
+
+    inline float SinDeg(float theta)
+    {
+        return std::sinf(theta * DEG2RAD);
+    }
+
+    inline float CosDeg(float theta)
+    {
+        return std::cosf(theta * DEG2RAD);
+    }
+
+    inline float TanDeg(float theta)
+    {
+        return std::tanf(theta * DEG2RAD);
     }
 }
 

@@ -18,10 +18,11 @@
     <ClCompile Include="MathTests.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="Vector3Tests.h">
+    <ClCompile Include="CommonTests.cpp">
       <Filter>Source Files</Filter>
-    </ClInclude>
+    </ClCompile>
+    <ClCompile Include="Vector3Tests.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>
