@@ -22,7 +22,7 @@ namespace Math
         {
         }
 
-        inline Quaternion AngleAxis(float angle, Vector3 axis)
+        inline static Quaternion AngleAxis(float angle, Vector3 axis)
         {
             angle = angle / 2 * DEG2RAD;
 
@@ -51,6 +51,18 @@ namespace Math
         return Vector3();
     }
 
+    inline bool operator==(const Quaternion& lhs, const Quaternion& rhs)
+    {
+        return FloatEq(lhs.w, rhs.w) &&
+            FloatEq(lhs.x, rhs.x) &&
+            FloatEq(lhs.y, rhs.y) &&
+            FloatEq(lhs.z, rhs.z);
+    }
+
+    inline bool operator!=(const Quaternion& lhs, const Quaternion& rhs)
+    {
+        return !(lhs == rhs);
+    }
 }
 
 #endif
