@@ -20,6 +20,7 @@ namespace Math
         float x, y, z;
     
         static const Vector3 zero;
+        static const Vector3 one;
         static const Vector3 right;
         static const Vector3 left;
         static const Vector3 up;
@@ -190,10 +191,9 @@ namespace Math
 
     inline bool operator==(const Vector3& lhs, const Vector3& rhs)
     {
-        const float epsilon = 0.000001f;
-        return std::abs(lhs.x - rhs.x) < epsilon &&
-            std::abs(lhs.y - rhs.y) < epsilon &&
-            std::abs(lhs.z - rhs.z) < epsilon;
+        return FloatEq(lhs.x, rhs.x) &&
+            FloatEq(lhs.y, rhs.y) &&
+            FloatEq(lhs.z, rhs.z);
     }
 
     inline bool operator!=(const Vector3& lhs, const Vector3& rhs)
