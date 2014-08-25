@@ -24,6 +24,8 @@ namespace Math
 
         inline static Quaternion AngleAxis(float angle, Vector3 axis)
         {
+            axis.Normalize();
+
             angle = angle / 2 * DEG2RAD;
 
             float cosAngle = std::cos(angle);
