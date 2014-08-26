@@ -130,6 +130,22 @@ TEST_CASE("Matrix4x4 projection functions", "[Matrix4x4]")
 
 TEST_CASE("Matrix4x4 Transposing and Inverting", "[Matrix4x4]")
 {
+    //Transposing
     REQUIRE(Matrix4x4(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15).GetTranspose() ==
         Matrix4x4(0, 4, 8, 12, 1, 5, 9, 13, 2, 6, 10, 14, 3, 7, 11, 15));
+
+    //Inverse
+    REQUIRE(Matrix4x4::identity.GetInverse() == Matrix4x4::identity);
+
+    Matrix4x4 m1 = Matrix4x4(
+        1, 2, 3, 4,
+        0, 6, 7, 8,
+        0, 0, 11, 12,
+        0, 0, 15, 16);
+    REQUIRE(m1.GetInverse() == Matrix4x4(
+        1, -1.0f/3.0f, -7.0f/3.0f, 5.0f/3.0f,
+        0, 1.0f/6.0f, -1.0f/3.0f, 1.0f/6.0f,
+        0, 0, -4, 3,
+        0, 0, 15.0f/4.0f, -11.0f/4.0f));
+    REQUIRE((m1 * m1.GetInverse()) == Matrix4x4::identity);
 }

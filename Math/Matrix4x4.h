@@ -119,8 +119,8 @@ namespace Math
         }
         
         //Operations
-        Matrix4x4 GetInverse();
-        Matrix4x4 GetTranspose();
+        Matrix4x4 GetInverse() const;
+        Matrix4x4 GetTranspose() const;
 
         inline Matrix4x4& operator*=(const Matrix4x4& rhs)
         {

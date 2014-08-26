@@ -130,13 +130,141 @@ namespace Math
         return matrix;
     }
     
-    Matrix4x4 Matrix4x4::GetInverse()
+    Matrix4x4 Matrix4x4::GetInverse() const
     {
-        //TODO
-        return Matrix4x4::zero;
+        //http://stackoverflow.com/questions/1148309/inverting-a-4x4-matrix
+        Matrix4x4 matrix;
+        float det;
+    
+        matrix[0] = _values[5]  * _values[10] * _values[15] - 
+                 _values[5]  * _values[11] * _values[14] - 
+                 _values[9]  * _values[6]  * _values[15] + 
+                 _values[9]  * _values[7]  * _values[14] +
+                 _values[13] * _values[6]  * _values[11] - 
+                 _values[13] * _values[7]  * _values[10];
+
+        matrix[4] = -_values[4]  * _values[10] * _values[15] + 
+                  _values[4]  * _values[11] * _values[14] + 
+                  _values[8]  * _values[6]  * _values[15] - 
+                  _values[8]  * _values[7]  * _values[14] - 
+                  _values[12] * _values[6]  * _values[11] + 
+                  _values[12] * _values[7]  * _values[10];
+
+        matrix[8] = _values[4]  * _values[9] * _values[15] - 
+                 _values[4]  * _values[11] * _values[13] - 
+                 _values[8]  * _values[5] * _values[15] + 
+                 _values[8]  * _values[7] * _values[13] + 
+                 _values[12] * _values[5] * _values[11] - 
+                 _values[12] * _values[7] * _values[9];
+
+        matrix[12] = -_values[4]  * _values[9] * _values[14] + 
+                   _values[4]  * _values[10] * _values[13] +
+                   _values[8]  * _values[5] * _values[14] - 
+                   _values[8]  * _values[6] * _values[13] - 
+                   _values[12] * _values[5] * _values[10] + 
+                   _values[12] * _values[6] * _values[9];
+
+        matrix[1] = -_values[1]  * _values[10] * _values[15] + 
+                  _values[1]  * _values[11] * _values[14] + 
+                  _values[9]  * _values[2] * _values[15] - 
+                  _values[9]  * _values[3] * _values[14] - 
+                  _values[13] * _values[2] * _values[11] + 
+                  _values[13] * _values[3] * _values[10];
+
+        matrix[5] = _values[0]  * _values[10] * _values[15] - 
+                 _values[0]  * _values[11] * _values[14] - 
+                 _values[8]  * _values[2] * _values[15] + 
+                 _values[8]  * _values[3] * _values[14] + 
+                 _values[12] * _values[2] * _values[11] - 
+                 _values[12] * _values[3] * _values[10];
+
+        matrix[9] = -_values[0]  * _values[9] * _values[15] + 
+                  _values[0]  * _values[11] * _values[13] + 
+                  _values[8]  * _values[1] * _values[15] - 
+                  _values[8]  * _values[3] * _values[13] - 
+                  _values[12] * _values[1] * _values[11] + 
+                  _values[12] * _values[3] * _values[9];
+
+        matrix[13] = _values[0]  * _values[9] * _values[14] - 
+                  _values[0]  * _values[10] * _values[13] - 
+                  _values[8]  * _values[1] * _values[14] + 
+                  _values[8]  * _values[2] * _values[13] + 
+                  _values[12] * _values[1] * _values[10] - 
+                  _values[12] * _values[2] * _values[9];
+
+        matrix[2] = _values[1]  * _values[6] * _values[15] - 
+                 _values[1]  * _values[7] * _values[14] - 
+                 _values[5]  * _values[2] * _values[15] + 
+                 _values[5]  * _values[3] * _values[14] + 
+                 _values[13] * _values[2] * _values[7] - 
+                 _values[13] * _values[3] * _values[6];
+
+        matrix[6] = -_values[0]  * _values[6] * _values[15] + 
+                  _values[0]  * _values[7] * _values[14] + 
+                  _values[4]  * _values[2] * _values[15] - 
+                  _values[4]  * _values[3] * _values[14] - 
+                  _values[12] * _values[2] * _values[7] + 
+                  _values[12] * _values[3] * _values[6];
+
+        matrix[10] = _values[0]  * _values[5] * _values[15] - 
+                  _values[0]  * _values[7] * _values[13] - 
+                  _values[4]  * _values[1] * _values[15] + 
+                  _values[4]  * _values[3] * _values[13] + 
+                  _values[12] * _values[1] * _values[7] - 
+                  _values[12] * _values[3] * _values[5];
+
+        matrix[14] = -_values[0]  * _values[5] * _values[14] + 
+                   _values[0]  * _values[6] * _values[13] + 
+                   _values[4]  * _values[1] * _values[14] - 
+                   _values[4]  * _values[2] * _values[13] - 
+                   _values[12] * _values[1] * _values[6] + 
+                   _values[12] * _values[2] * _values[5];
+
+        matrix[3] = -_values[1] * _values[6] * _values[11] + 
+                  _values[1] * _values[7] * _values[10] + 
+                  _values[5] * _values[2] * _values[11] - 
+                  _values[5] * _values[3] * _values[10] - 
+                  _values[9] * _values[2] * _values[7] + 
+                  _values[9] * _values[3] * _values[6];
+
+        matrix[7] = _values[0] * _values[6] * _values[11] - 
+                 _values[0] * _values[7] * _values[10] - 
+                 _values[4] * _values[2] * _values[11] + 
+                 _values[4] * _values[3] * _values[10] + 
+                 _values[8] * _values[2] * _values[7] - 
+                 _values[8] * _values[3] * _values[6];
+
+        matrix[11] = -_values[0] * _values[5] * _values[11] + 
+                   _values[0] * _values[7] * _values[9] + 
+                   _values[4] * _values[1] * _values[11] - 
+                   _values[4] * _values[3] * _values[9] - 
+                   _values[8] * _values[1] * _values[7] + 
+                   _values[8] * _values[3] * _values[5];
+
+        matrix[15] = _values[0] * _values[5] * _values[10] - 
+                  _values[0] * _values[6] * _values[9] - 
+                  _values[4] * _values[1] * _values[10] + 
+                  _values[4] * _values[2] * _values[9] + 
+                  _values[8] * _values[1] * _values[6] - 
+                  _values[8] * _values[2] * _values[5];
+
+        det = _values[0] * matrix[0] + _values[1] * matrix[4] +
+            _values[2] * matrix[8] + _values[3] * matrix[12];
+
+        if (det == 0)
+        {
+            return Matrix4x4::zero;
+        }
+
+        det = 1.0 / det;
+
+        for (int i = 0; i < 16; i++)
+            matrix[i] *= det;
+    
+        return matrix;
     }
     
-    Matrix4x4 Matrix4x4::GetTranspose()
+    Matrix4x4 Matrix4x4::GetTranspose() const
     {
         return Matrix4x4(
             _values[0], _values[1], _values[2], _values[3],
