@@ -4,6 +4,8 @@
 
 namespace Graphics
 {
+    void FlipTextureVertically(int channels, int width, int height, void* data);
+
     Texture::Texture()
     {
         _textureId = 0;
@@ -49,6 +51,10 @@ namespace Graphics
             assert(false);
         }
 
+        //Flip the texture so that the start is the lower left corner
+        FlipTextureVertically(surface->format->BytesPerPixel,
+            surface->w, surface->h, surface->pixels);
+
         //Upload to the GPU
         glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, surface->w, surface->h, 0,
             format, GL_UNSIGNED_BYTE, surface->pixels);
@@ -57,6 +63,32 @@ namespace Graphics
 
         return true;
     }
+
+    void FlipTextureVertically(int bytesPerPixel, int width, int height, void* pixels)
+    {
+        char* data = (char*)pixels;
+        int y1 = 0;
+        int y2 = height - 1;
+
+        int lineSize = bytesPerPixel * width;
+        char* buffer = new char[lineSize];
+
+        while (y1 < y2)
+        {
+            //Swap one line at a time
+            memcpy(buffer, &data[y1 * lineSize], lineSize);
+            memcpy(&data[y1 * lineSize], &data[y2 * lineSize], lineSize);
+            memcpy(&data[y2 * lineSize], buffer, lineSize);
+
+            //Next line
+            y1++;
+            y2--;
+        }
+
+        delete buffer;
+    }
+
+
 
     void Texture::Bind()
     {
