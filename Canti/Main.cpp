@@ -8,16 +8,23 @@
 #include <Graphics/Mesh.h>
 #include <Graphics/Material.h>
 using namespace Graphics;
+#include <Utils/Input.h>
+using namespace Utils;
 
 
 void Init();
+void Update();
 void Display();
 
 
+Input input;
 Mesh mesh;
 Shader shader;
 Texture texture;
 Material material;
+
+Vector3 cameraPos = Vector3(0, 2, 0);
+Vector2 cameraRot;
 
 
 int main(int argc, char **argv)
@@ -64,6 +71,7 @@ int main(int argc, char **argv)
             }
         }
 
+        Update();
         Display();
 
         SDL_GL_SwapWindow(window);
@@ -91,8 +99,52 @@ void Init()
     material.SetTexture(shader.GetUniformLocation("tex_diffuse"), texture);
 
     glEnable(GL_DEPTH_TEST);
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_BACK);
 
     glClearColor(0.1f, 0.1f, 0.1f, 0.0f);
+
+    SDL_SetRelativeMouseMode(SDL_TRUE);
+}
+
+void Update()
+{
+    input.Update();
+
+    const float sensitivity = 0.2f;
+    cameraRot.x -= sensitivity * input.GetRelativeMouseX();
+    cameraRot.y = Math::Clamp(cameraRot.y - sensitivity * input.GetRelativeMouseY(), -90.0f, 90.0f);
+
+
+    //Forward and back
+    if (input.KeyDown(SDL_SCANCODE_W))
+    {
+        cameraPos -= 0.1f * Vector3(Math::SinDeg(cameraRot.x), 0, Math::CosDeg(cameraRot.x));
+    }
+    else if (input.KeyDown(SDL_SCANCODE_S))
+    {
+        cameraPos += 0.1f * Vector3(Math::SinDeg(cameraRot.x), 0, Math::CosDeg(cameraRot.x));
+    }
+
+    //Left and right
+    if (input.KeyDown(SDL_SCANCODE_A))
+    {
+        cameraPos -= 0.1f * Vector3(Math::CosDeg(cameraRot.x), 0, -Math::SinDeg(cameraRot.x));
+    }
+    else if (input.KeyDown(SDL_SCANCODE_D))
+    {
+        cameraPos += 0.1f * Vector3(Math::CosDeg(cameraRot.x), 0, -Math::SinDeg(cameraRot.x));
+    }
+
+    //Up and down
+    if (input.KeyDown(SDL_SCANCODE_Q))
+    {
+        cameraPos.y -= 0.1f;
+    }
+    else if (input.KeyDown(SDL_SCANCODE_E))
+    {
+        cameraPos.y += 0.1f;
+    }
 }
 
 void Display()
@@ -100,12 +152,11 @@ void Display()
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     auto projection = Matrix4x4::Perspective(60, 4.0f / 3.0f, 0.01f, 1000);
-    auto matrix = Matrix4x4::FromTransform(
-        Vector3(0, -2, 0),
-        Quaternion::AngleAxis(SDL_GetTicks() / 20, Vector3::up),
-        Vector3::one);
-
-    matrix = projection * matrix;
+    auto view = Matrix4x4::FromTransform(
+        cameraPos,
+        Quaternion::AngleAxis(cameraRot.x, Vector3::up) * Quaternion::AngleAxis(cameraRot.y, Vector3::right),
+        Vector3::one).GetInverse();
+    auto matrix = projection * view * Matrix4x4::FromPosition(Vector3(0, 0, -4));
     glUniformMatrix4fv(shader.GetUniformLocation("in_modelview"), 1, false, &matrix[0]);
 
     material.Start();
