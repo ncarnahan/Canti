@@ -84,8 +84,8 @@ TEST_CASE("Vector3 functions", "[Vector3]")
     //Dot and Cross Products
     REQUIRE(Vector3::Dot(Vector3(0, 2, 0), Vector3(1, 1, 0)) == 2);
     REQUIRE(Vector3::Dot(Vector3(1, 2, 3), Vector3(-4, 5, -6)) == -12);
-    REQUIRE(Vector3::Cross(Vector3::up, Vector3::forward) == Vector3::right);
-    REQUIRE(Vector3::Cross(Vector3::forward, Vector3::up) == Vector3::left);
+    REQUIRE(Vector3::Cross(Vector3::up, Vector3::back) == Vector3::right);
+    REQUIRE(Vector3::Cross(Vector3::back, Vector3::up) == Vector3::left);
 
     //Magnitude
     REQUIRE(Vector3(1, 0, 0).Magnitude() == 1);
