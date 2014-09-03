@@ -49,8 +49,12 @@ namespace Math
 
     inline Vector3 operator*(const Quaternion& lhs, const Vector3& rhs)
     {
-        //TODO
-        return Vector3();
+        //http://molecularmusings.wordpress.com/2013/05/24/a-faster-quaternion-vector-multiplication/
+        //t = 2 * cross(q.xyz, v)
+        //v' = v + q.w * t + cross(q.xyz, t)
+        Vector3 q = Vector3(lhs.x, lhs.y, lhs.z);
+        Vector3 t = 2 * Vector3::Cross(q, rhs);
+        return rhs + lhs.w * t + Vector3::Cross(q, t);
     }
 
     inline bool operator==(const Quaternion& lhs, const Quaternion& rhs)

@@ -25,4 +25,8 @@ TEST_CASE("Quaternion Multiplication", "[Quaternion]")
 
     REQUIRE((Quaternion::AngleAxis(3.7f, Vector3(1, 2, 3)) * Quaternion::AngleAxis(80, Vector3::down)) ==
         Quaternion(0.7767371f, 0.02324732f, -0.6292337f, 0.01428231f));
+
+    REQUIRE((Quaternion::AngleAxis(90, Vector3::up) * Vector3::forward) == Vector3::right);
+    REQUIRE((Quaternion::AngleAxis(-90, Vector3::up) * Vector3::forward) == Vector3::left);
+    REQUIRE((Quaternion::AngleAxis(37, Vector3::up) * Vector3(1, 3, 5)) == Vector3(3.807711f, 3, 3.391362f));
 }
