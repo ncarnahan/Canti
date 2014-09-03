@@ -43,7 +43,7 @@ int main(int argc, char **argv)
 
     SDL_Window* window = SDL_CreateWindow("Title",
         SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
-        800, 600, SDL_WINDOW_OPENGL);
+        1280, 720, SDL_WINDOW_OPENGL);
     
     SDL_GLContext context = SDL_GL_CreateContext(window);
 
@@ -116,34 +116,36 @@ void Update()
     cameraRot.y = Math::Clamp(cameraRot.y - sensitivity * input.GetRelativeMouseY(), -90.0f, 90.0f);
 
 
+    Quaternion rotation = Quaternion::AngleAxis(cameraRot.x, Vector3::up) * Quaternion::AngleAxis(cameraRot.y, Vector3::right);
+
     //Forward and back
     if (input.KeyDown(SDL_SCANCODE_W))
     {
-        cameraPos -= 0.1f * Vector3(Math::SinDeg(cameraRot.x), 0, Math::CosDeg(cameraRot.x));
+        cameraPos += 0.1f * (rotation * Vector3::forward);
     }
     else if (input.KeyDown(SDL_SCANCODE_S))
     {
-        cameraPos += 0.1f * Vector3(Math::SinDeg(cameraRot.x), 0, Math::CosDeg(cameraRot.x));
+        cameraPos += 0.1f * (rotation * Vector3::back);
     }
 
     //Left and right
     if (input.KeyDown(SDL_SCANCODE_A))
     {
-        cameraPos -= 0.1f * Vector3(Math::CosDeg(cameraRot.x), 0, -Math::SinDeg(cameraRot.x));
+        cameraPos += 0.1f * (rotation * Vector3::left);
     }
     else if (input.KeyDown(SDL_SCANCODE_D))
     {
-        cameraPos += 0.1f * Vector3(Math::CosDeg(cameraRot.x), 0, -Math::SinDeg(cameraRot.x));
+        cameraPos += 0.1f * (rotation * Vector3::right);
     }
 
     //Up and down
     if (input.KeyDown(SDL_SCANCODE_Q))
     {
-        cameraPos.y -= 0.1f;
+        cameraPos += 0.1f * (rotation * Vector3::down);
     }
     else if (input.KeyDown(SDL_SCANCODE_E))
     {
-        cameraPos.y += 0.1f;
+        cameraPos += 0.1f * (rotation * Vector3::up);
     }
 }
 
@@ -151,7 +153,7 @@ void Display()
 {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    auto projection = Matrix4x4::Perspective(60, 4.0f / 3.0f, 0.01f, 1000);
+    auto projection = Matrix4x4::Perspective(60, 16.0f / 9.0f, 0.01f, 1000);
     auto view = Matrix4x4::FromTransform(
         cameraPos,
         Quaternion::AngleAxis(cameraRot.x, Vector3::up) * Quaternion::AngleAxis(cameraRot.y, Vector3::right),
