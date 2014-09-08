@@ -5,7 +5,7 @@
 #include <Graphics/OpenGL.h>
 #include <Graphics/Shader.h>
 #include <Graphics/Texture.h>
-#include <Graphics/Mesh.h>
+#include <Graphics/StaticMesh.h>
 #include <Graphics/Material.h>
 using namespace Graphics;
 #include <Utils/Input.h>
@@ -18,7 +18,7 @@ void Display();
 
 
 Input input;
-Mesh mesh;
+StaticMesh mesh;
 Shader shader;
 Texture texture;
 Material material;

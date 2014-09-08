@@ -1,4 +1,4 @@
-#include "Mesh.h"
+#include "StaticMesh.h"
 #include "Shader.h"
 #include <iostream>
 #include <fstream>
@@ -9,13 +9,13 @@ using namespace Utils;
 
 namespace Graphics
 {
-    Mesh::Mesh()
+    StaticMesh::StaticMesh()
     {
     }
 
 
     
-    bool Mesh::LoadObjFile(const char* fileName)
+    bool StaticMesh::LoadObjFile(const char* fileName)
     {
         std::vector<Vector3> positions;
         std::vector<Vector3> normals;
@@ -41,7 +41,7 @@ namespace Graphics
     }
 
     //Helper function to parse an obj file into an in-memory representation
-    bool Mesh::ParseObjFile(const char* fileName,
+    bool StaticMesh::ParseObjFile(const char* fileName,
         std::vector<Vector3>& positions,
         std::vector<Vector3>& normals,
         std::vector<Vector2>& uvs,
@@ -150,7 +150,7 @@ namespace Graphics
     };
 
     //Helper function to turn the obj data into a Vertex array and an index array
-    void Mesh::ConvertObjToMesh(
+    void StaticMesh::ConvertObjToMesh(
         std::vector<Vector3>& positions,
         std::vector<Vector3>& normals,
         std::vector<Vector2>& uvs,
@@ -203,7 +203,7 @@ namespace Graphics
 
     //Generates the VAO, generates two VBOs (one for vertices, one for
     //indices), and sets up the attribute pointers for common attributes.
-    void Mesh::GenerateVao()
+    void StaticMesh::GenerateVao()
     {
         //Generate the VAO
         glGenVertexArrays(1, &vao);
@@ -235,7 +235,7 @@ namespace Graphics
 
 
 
-    void Mesh::Draw()
+    void StaticMesh::Draw()
     {
         glBindVertexArray(vao);
         glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);

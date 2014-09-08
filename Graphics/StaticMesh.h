@@ -1,5 +1,5 @@
-#ifndef GRAPHICS_MESH_H
-#define GRAPHICS_MESH_H
+#ifndef GRAPHICS_STATIC_MESH_H
+#define GRAPHICS_STATIC_MESH_H
 
 #include <array>
 #include <vector>
@@ -8,7 +8,7 @@
 
 namespace Graphics
 {
-    class Mesh
+    class StaticMesh
     {
     private:
         std::vector<Vertex> vertices;
@@ -20,7 +20,7 @@ namespace Graphics
 
 
     public:
-        Mesh();
+        StaticMesh();
 
         bool LoadObjFile(const char* fileName);
         void Draw();
@@ -32,7 +32,7 @@ namespace Graphics
             std::vector<Vector3>& normals,
             std::vector<Vector2>& uvs,
             std::vector<std::array<std::array<int, 3>, 3>>& faces);
-        void Mesh::ConvertObjToMesh(
+        void ConvertObjToMesh(
             std::vector<Vector3>& positions,
             std::vector<Vector3>& normals,
             std::vector<Vector2>& uvs,
