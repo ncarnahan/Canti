@@ -9,12 +9,29 @@ using namespace Utils;
 
 namespace Graphics
 {
+    //Helper function forward declarations
+    bool ParseObjFile(const char* fileName,
+        std::vector<Vector3>& positions,
+        std::vector<Vector3>& normals,
+        std::vector<Vector2>& uvs,
+        std::vector<std::array<std::array<int, 3>, 3>>& faces);
+    void ConvertObjToMesh(
+        //In
+        std::vector<Vector3>& positions,
+        std::vector<Vector3>& normals,
+        std::vector<Vector2>& uvs,
+        std::vector<std::array<std::array<int, 3>, 3>>& faces,
+        //Out
+        std::vector<Vertex>& vertices,
+        std::vector<GLuint>& indices);
+
+
+
     StaticMesh::StaticMesh()
     {
     }
-
-
     
+
     bool StaticMesh::LoadObjFile(const char* fileName)
     {
         std::vector<Vector3> positions;
@@ -31,17 +48,63 @@ namespace Graphics
             return false;
         }
 
+
+        std::vector<Vertex> vertices;
+        std::vector<GLuint> indices;
+
         //Convert the in-memory OBJ into vertices and indices
-        ConvertObjToMesh(positions, normals, uvs, faces);
+        ConvertObjToMesh(positions, normals, uvs, faces, vertices, indices);
+
 
         //Generate a VAO, create VBOs, etc.
-        GenerateVao();
+        BufferData(vertices, indices);
         
         return true;
     }
 
+    //Generates the VAO, generates two VBOs (one for vertices, one for
+    //indices), and sets up the attribute pointers for common attributes.
+    void StaticMesh::BufferData(std::vector<Vertex>& vertices, std::vector<GLuint>& indices)
+    {
+        //Generate the VAO
+        glGenVertexArrays(1, &vao);
+        glBindVertexArray(vao);
+
+        //Generate the vertices VBO
+        glGenBuffers(1, &vbo);
+        glBindBuffer(GL_ARRAY_BUFFER, vbo);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * vertices.size(), &vertices[0], GL_STATIC_DRAW);
+
+        //Generate the indices EAB
+        glGenBuffers(1, &eab);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, eab);
+        size = indices.size();
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint) * size, &indices[0], GL_STATIC_DRAW);
+
+        //Assign the attributes
+        glEnableVertexAttribArray((int)ShaderAttribute::Position);
+        glVertexAttribPointer((int)ShaderAttribute::Position,
+            3, GL_FLOAT, false, sizeof(Vertex), (void*)offsetof(Vertex, position));
+
+        glEnableVertexAttribArray((int)ShaderAttribute::Normal);
+        glVertexAttribPointer((int)ShaderAttribute::Normal,
+            3, GL_FLOAT, false, sizeof(Vertex), (void*)offsetof(Vertex, normal));
+
+        glEnableVertexAttribArray((int)ShaderAttribute::UV);
+        glVertexAttribPointer((int)ShaderAttribute::UV,
+            2, GL_FLOAT, false, sizeof(Vertex), (void*)offsetof(Vertex, uv));
+    }
+
+    void StaticMesh::Draw()
+    {
+        glBindVertexArray(vao);
+        glDrawElements(GL_TRIANGLES, size, GL_UNSIGNED_INT, 0);
+    }
+
+
+
     //Helper function to parse an obj file into an in-memory representation
-    bool StaticMesh::ParseObjFile(const char* fileName,
+    bool ParseObjFile(const char* fileName,
         std::vector<Vector3>& positions,
         std::vector<Vector3>& normals,
         std::vector<Vector2>& uvs,
@@ -150,11 +213,15 @@ namespace Graphics
     };
 
     //Helper function to turn the obj data into a Vertex array and an index array
-    void StaticMesh::ConvertObjToMesh(
+    void ConvertObjToMesh(
+        //In
         std::vector<Vector3>& positions,
         std::vector<Vector3>& normals,
         std::vector<Vector2>& uvs,
-        std::vector<std::array<std::array<int, 3>, 3>>& faces)
+        std::vector<std::array<std::array<int, 3>, 3>>& faces,
+        //Out
+        std::vector<Vertex>& vertices,
+        std::vector<GLuint>& indices)
     {
         //This maps vertices to their indices
         std::unordered_map<std::array<int, 3>, int, VertexIndicesHash, VertexIndicesEqual> vertexToIndex;
@@ -182,8 +249,8 @@ namespace Graphics
                     }
 
                     //It hasn't already been added to the list
-                    this->vertices.push_back(vertex);
-                    index = this->vertices.size() - 1;
+                    vertices.push_back(vertex);
+                    index = vertices.size() - 1;
 
                     //Add to the hashmap for later
                     vertexToIndex.insert(
@@ -196,48 +263,8 @@ namespace Graphics
                 }
 
                 //Add the index to the list
-                this->indices.push_back(index);
+                indices.push_back(index);
             }
         }
-    }
-
-    //Generates the VAO, generates two VBOs (one for vertices, one for
-    //indices), and sets up the attribute pointers for common attributes.
-    void StaticMesh::GenerateVao()
-    {
-        //Generate the VAO
-        glGenVertexArrays(1, &vao);
-        glBindVertexArray(vao);
-
-        //Generate the vertices VBO
-        glGenBuffers(1, &vbo);
-        glBindBuffer(GL_ARRAY_BUFFER, vbo);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * vertices.size(), &vertices[0], GL_STATIC_DRAW);
-
-        //Generate the indices EAB
-        glGenBuffers(1, &eab);
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, eab);
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint) * indices.size(), &indices[0], GL_STATIC_DRAW);
-
-        //Assign the attributes
-        glEnableVertexAttribArray((int)ShaderAttribute::Position);
-        glVertexAttribPointer((int)ShaderAttribute::Position,
-            3, GL_FLOAT, false, sizeof(Vertex), (void*)offsetof(Vertex, position));
-
-        glEnableVertexAttribArray((int)ShaderAttribute::Normal);
-        glVertexAttribPointer((int)ShaderAttribute::Normal,
-            3, GL_FLOAT, false, sizeof(Vertex), (void*)offsetof(Vertex, normal));
-
-        glEnableVertexAttribArray((int)ShaderAttribute::UV);
-        glVertexAttribPointer((int)ShaderAttribute::UV,
-            2, GL_FLOAT, false, sizeof(Vertex), (void*)offsetof(Vertex, uv));
-    }
-
-
-
-    void StaticMesh::Draw()
-    {
-        glBindVertexArray(vao);
-        glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
     }
 }
