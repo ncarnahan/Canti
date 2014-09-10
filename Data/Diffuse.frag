@@ -5,6 +5,8 @@ uniform sampler2D tex_diffuse;
 in vec4 normal;
 in vec4 uv;
 
+out vec4 out_color;
+
 void main() {
-    gl_FragColor = texture(tex_diffuse, uv.st);
+    out_color = texture(tex_diffuse, uv.st);
 }
