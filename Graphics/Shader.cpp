@@ -70,7 +70,7 @@ namespace Graphics
         if (!success)
         {
             std::cout << "Fragment shader failed to compile.\n";
-            std::cout << GetShaderCompileError(vertexShader);
+            std::cout << GetShaderCompileError(fragmentShader);
             goto error;
         }
  
