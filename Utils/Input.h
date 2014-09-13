@@ -25,9 +25,9 @@ namespace Utils
         bool KeyPressed(int key);
         bool KeyReleased(int key);
 
-        bool ButtonDown(int key);
-        bool ButtonPressed(int key);
-        bool ButtonReleased(int key);
+        bool ButtonDown(int button);
+        bool ButtonPressed(int button);
+        bool ButtonReleased(int button);
 
         inline int GetRelativeMouseX() { return relativeX; }
         inline int GetRelativeMouseY() { return relativeY; }
