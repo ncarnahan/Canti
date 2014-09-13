@@ -5,6 +5,16 @@
 
 namespace Graphics
 {
+    struct TextureLoadSettings
+    {
+        bool useSrgbColorSpace;
+
+        TextureLoadSettings() :
+            useSrgbColorSpace(false)
+        {
+        }
+    };
+
     class Texture
     {
     private:
@@ -15,6 +25,7 @@ namespace Graphics
         ~Texture();
 
         bool Load(const char* fileName);
+        bool Load(const char* fileName, TextureLoadSettings& settings);
         void Bind();
     };
 }

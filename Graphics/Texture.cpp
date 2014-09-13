@@ -18,6 +18,11 @@ namespace Graphics
 
     bool Texture::Load(const char* fileName)
     {
+        return Load(fileName, TextureLoadSettings());
+    }
+
+    bool Texture::Load(const char* fileName, TextureLoadSettings& settings)
+    {
         auto surface = IMG_Load(fileName);
         
         glGenTextures(1, &_textureId);
@@ -36,11 +41,25 @@ namespace Graphics
         switch (surface->format->BytesPerPixel) {
         case 4:
             format = (surface->format->Rmask == 0x000000ff) ? GL_RGBA : GL_BGRA;
-            internalFormat = GL_RGBA8;
+            if (settings.useSrgbColorSpace)
+            {
+                internalFormat = GL_SRGB8_ALPHA8;
+            }
+            else
+            {
+                internalFormat = GL_RGBA8;
+            }
             break;
         case 3:
             format = (surface->format->Rmask == 0x000000ff) ? GL_RGB : GL_BGR;
-            internalFormat = GL_RGB8;
+            if (settings.useSrgbColorSpace)
+            {
+                internalFormat = GL_SRGB8;
+            }
+            else
+            {
+                internalFormat = GL_RGB8;
+            }
             break;
         case 1:
             //TODO: SDL_image doesn't appear to be loading 8-bit textures correctly
