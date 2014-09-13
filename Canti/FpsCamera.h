@@ -15,11 +15,22 @@ private:
     Vector3 _position;
     Vector2 _rotation;
 
+    SDL_Window* _window;
+    int _mouseDownX;
+    int _mouseDownY;
+
 public:
-    inline FpsCamera() { }
+    inline FpsCamera()
+    {
+    }
 
     void Update(float dt, Input& input);
 
+
+    inline void SetWindow(SDL_Window* window)
+    {
+        _window = window;
+    }
 
     inline void SetPosition(Vector3 position)
     {

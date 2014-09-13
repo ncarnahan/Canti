@@ -44,6 +44,7 @@ int main(int argc, char **argv)
     SDL_Window* window = SDL_CreateWindow("Title",
         SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
         1280, 720, SDL_WINDOW_OPENGL);
+    camera.SetWindow(window);
     
     SDL_GLContext context = SDL_GL_CreateContext(window);
 
@@ -91,9 +92,11 @@ void Init()
     shader.LoadFromFiles("Data/Diffuse.vert", "Data/Diffuse.frag");
     shader.Start();
 
-    mesh.LoadObjFile("Data/Hallway.obj");
+    mesh.LoadObjFile("Data/Suzanne.obj");
 
-    texture.Load("Data/Hallway.png");
+    TextureLoadSettings textureLoadSettings;
+    textureLoadSettings.useSrgbColorSpace = true;
+    texture.Load("Data/Texture.png", textureLoadSettings);
 
     material.SetShader(shader);
     material.SetTexture(shader.GetUniformLocation("tex_diffuse"), texture);
@@ -105,8 +108,6 @@ void Init()
     glCullFace(GL_BACK);
 
     glClearColor(0.1f, 0.1f, 0.1f, 0.0f);
-
-    SDL_SetRelativeMouseMode(SDL_TRUE);
 }
 
 void Update()
@@ -119,12 +120,16 @@ void Display()
 {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    auto projection = Matrix4x4::Perspective(60, 16.0f / 9.0f, 0.01f, 1000);
+    auto projection = Matrix4x4::Perspective(65, 16.0f / 9.0f, 0.01f, 1000);
     auto view = camera.GetViewMatrix();
     auto matrix = projection * view * Matrix4x4::FromPosition(Vector3(0, 0, -4));
     glUniformMatrix4fv(shader.GetUniformLocation("in_modelview"), 1, false, &matrix[0]);
 
     material.Start();
+    mesh.Draw();
+
+    auto matrix2 = projection * view * Matrix4x4::FromPosition(Vector3(6, 0, 0));
+    glUniformMatrix4fv(shader.GetUniformLocation("in_modelview"), 1, false, &matrix2[0]);
     mesh.Draw();
     
     auto error = glGetError();
