@@ -3,11 +3,11 @@
 uniform mat4 in_modelview;
 
 in vec4 in_position;
-in vec4 in_normal;
-in vec4 in_uv;
+in vec3 in_normal;
+in vec2 in_uv;
 
-out vec4 normal;
-out vec4 uv;
+out vec3 normal;
+out vec2 uv;
 
 void main() {
     normal = in_normal;
