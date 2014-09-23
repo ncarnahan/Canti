@@ -6,6 +6,32 @@ namespace Graphics
 {
     void FlipTextureVertically(int channels, int width, int height, void* data);
 
+    int TextureLoadSettings::GetMinFilter()
+    {
+        switch (filter)
+        {
+        case TextureFilter::Nearest:
+            return generateMipmaps ? GL_NEAREST : GL_NEAREST_MIPMAP_LINEAR;
+        case TextureFilter::Trilinear:
+            return generateMipmaps ? GL_LINEAR : GL_LINEAR_MIPMAP_LINEAR;
+        default:
+            return GL_LINEAR;
+        }
+    }
+
+    int TextureLoadSettings::GetMagFilter()
+    {
+        switch (filter)
+        {
+        case TextureFilter::Nearest:
+            return GL_NEAREST;
+        case TextureFilter::Trilinear:
+            return GL_LINEAR;
+        default:
+            return GL_LINEAR;
+        }
+    }
+
     Texture::Texture()
     {
         _textureId = 0;
@@ -30,8 +56,8 @@ namespace Graphics
 
         //TODO: Mipmaps
         //TODO: Make this stuff configurable
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, settings.GetMinFilter());
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, settings.GetMagFilter());
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
@@ -77,6 +103,12 @@ namespace Graphics
         //Upload to the GPU
         glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, surface->w, surface->h, 0,
             format, GL_UNSIGNED_BYTE, surface->pixels);
+
+        //Generate Mipmaps
+        if (settings.generateMipmaps)
+        {
+            glGenerateMipmap(GL_TEXTURE_2D);
+        }
 
         SDL_FreeSurface(surface);
 

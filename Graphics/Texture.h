@@ -5,14 +5,27 @@
 
 namespace Graphics
 {
+    enum class TextureFilter
+    {
+        Nearest,
+        Trilinear,
+    };
+
     struct TextureLoadSettings
     {
         bool useSrgbColorSpace;
+        bool generateMipmaps;
+        TextureFilter filter;
 
         TextureLoadSettings() :
-            useSrgbColorSpace(false)
+            useSrgbColorSpace(false),
+            generateMipmaps(true),
+            filter(TextureFilter::Trilinear)
         {
         }
+
+        int GetMinFilter();
+        int GetMagFilter();
     };
 
     class Texture
