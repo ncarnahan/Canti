@@ -20,10 +20,16 @@ private:
 
     Input _input;
     FpsCamera _camera;
-    StaticMesh _mesh;
+
     Shader _shader;
-    Texture _texture;
-    Material _material;
+
+    StaticMesh _suzanneMesh;
+    Texture _suzanneTexture;
+    Material _suzanneMaterial;
+    
+    StaticMesh _roomMesh;
+    Texture _roomTexture;
+    Material _roomMaterial;
 
 
 public:

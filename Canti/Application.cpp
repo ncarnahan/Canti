@@ -52,14 +52,19 @@ void Application::Init()
     _shader.LoadFromFiles("Data/Diffuse.vert", "Data/Diffuse.frag");
     _shader.Start();
 
-    _mesh.LoadObjFile("Data/Suzanne.obj");
+    _suzanneMesh.LoadObjFile("Data/Suzanne.obj");
+    _roomMesh.LoadObjFile("Data/Room.obj");
 
     TextureLoadSettings textureLoadSettings;
     textureLoadSettings.useSrgbColorSpace = true;
-    _texture.Load("Data/Texture.png", textureLoadSettings);
+    _suzanneTexture.Load("Data/Texture.png", textureLoadSettings);
+    _roomTexture.Load("Data/Tiles.png", textureLoadSettings);
 
-    _material.SetShader(_shader);
-    _material.SetTexture(_shader.GetUniformLocation("tex_diffuse"), _texture);
+    _suzanneMaterial.SetShader(_shader);
+    _suzanneMaterial.SetTexture(_shader.GetUniformLocation("tex_diffuse"), _suzanneTexture);
+
+    _roomMaterial.SetShader(_shader);
+    _roomMaterial.SetTexture(_shader.GetUniformLocation("tex_diffuse"), _roomTexture);
 
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
@@ -97,15 +102,28 @@ void Application::Render()
 
     auto projection = Matrix4x4::Perspective(65, 16.0f / 9.0f, 0.01f, 1000);
     auto view = _camera.GetViewMatrix();
-    auto matrix = projection * view * Matrix4x4::FromPosition(Vector3(0, 0, -4));
+    auto pv = projection * view;
+    Matrix4x4 matrix;
+
+    Vector3 direction = Quaternion::AngleAxis((float)SDL_GetTicks() / 100.0f, Vector3::up) * Vector3::forward + Vector3(0, 0.2f, 0);
+    Vector3 color = Vector3(1, 1, 1);
+    glUniform1f(_shader.GetUniformLocation("light.intensity"), 1.0f);
+    glUniform3fv(_shader.GetUniformLocation("light.direction"), 1, &direction[0]);
+    glUniform3fv(_shader.GetUniformLocation("light.color"), 1, &color[0]);
+
+    matrix = pv * Matrix4x4::FromPosition(Vector3(0, -2, 0));
     glUniformMatrix4fv(_shader.GetUniformLocation("in_modelview"), 1, false, &matrix[0]);
+    _roomMaterial.Start();
+    _roomMesh.Draw();
 
-    _material.Start();
-    _mesh.Draw();
+    matrix = pv * Matrix4x4::FromPosition(Vector3(0, 0, -4));
+    glUniformMatrix4fv(_shader.GetUniformLocation("in_modelview"), 1, false, &matrix[0]);
+    _suzanneMaterial.Start();
+    _suzanneMesh.Draw();
 
-    auto matrix2 = projection * view * Matrix4x4::FromPosition(Vector3(6, 0, 0));
-    glUniformMatrix4fv(_shader.GetUniformLocation("in_modelview"), 1, false, &matrix2[0]);
-    _mesh.Draw();
+    matrix = pv * Matrix4x4::FromPosition(Vector3(6, 0, 0));
+    glUniformMatrix4fv(_shader.GetUniformLocation("in_modelview"), 1, false, &matrix[0]);
+    _suzanneMesh.Draw();
     
     auto error = glGetError();
     if (error != GL_NO_ERROR)
