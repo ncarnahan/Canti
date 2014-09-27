@@ -6,31 +6,26 @@
 
 namespace Graphics
 {
-    //These are the indices for common shader attributes
-    enum class ShaderAttribute : GLint
+    enum class ShaderType : GLuint
     {
-        Position,
-        Normal,
-        UV,
+        Vertex = GL_VERTEX_SHADER,
+        Geometry = GL_GEOMETRY_SHADER,
+        Fragment = GL_FRAGMENT_SHADER,
     };
 
     class Shader
     {
     private:
-        GLuint program;
+        GLuint shader;
 
     public:
         Shader();
         ~Shader();
 
-        bool LoadFromFiles(std::string vertFile, std::string fragFile);
-        bool LoadFromStrings(std::string& vertContents, std::string& fragContents);
+        bool LoadFromFile(ShaderType type, const char* fileName);
+        bool LoadFromString(ShaderType type, const char* source);
 
-        void Start();
-        void Stop();
-
-        inline GLint GetUniformLocation(const char* name) { return glGetUniformLocation(program, name); }
-        inline GLuint GetProgram() { return program; }
+        inline GLuint GetShader() const { return shader; }
     };
 }
 

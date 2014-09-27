@@ -1,4 +1,5 @@
 #include "Material.h"
+#include "Program.h"
 
 namespace Graphics
 {
@@ -8,7 +9,7 @@ namespace Graphics
 
     void Material::Start()
     {
-        _shader->Start();
+        _program->Start();
 
         for (size_t i = 0; i < _textures.size(); i++)
         {
@@ -17,7 +18,6 @@ namespace Graphics
             glUniform1i(pair.first, i);
             glActiveTexture(GL_TEXTURE0 + i);
             pair.second.Bind();
-            //glBindSampler(i, SamplerHandle);
         }
     }
 

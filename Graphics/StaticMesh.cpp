@@ -1,5 +1,5 @@
 #include "StaticMesh.h"
-#include "Shader.h"
+#include "Program.h"
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -82,16 +82,16 @@ namespace Graphics
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint) * size, &indices[0], GL_STATIC_DRAW);
 
         //Assign the attributes
-        glEnableVertexAttribArray((int)ShaderAttribute::Position);
-        glVertexAttribPointer((int)ShaderAttribute::Position,
+        glEnableVertexAttribArray((int)ProgramAttribute::Position);
+        glVertexAttribPointer((int)ProgramAttribute::Position,
             3, GL_FLOAT, false, sizeof(Vertex), (void*)offsetof(Vertex, position));
 
-        glEnableVertexAttribArray((int)ShaderAttribute::Normal);
-        glVertexAttribPointer((int)ShaderAttribute::Normal,
+        glEnableVertexAttribArray((int)ProgramAttribute::Normal);
+        glVertexAttribPointer((int)ProgramAttribute::Normal,
             3, GL_FLOAT, false, sizeof(Vertex), (void*)offsetof(Vertex, normal));
 
-        glEnableVertexAttribArray((int)ShaderAttribute::UV);
-        glVertexAttribPointer((int)ShaderAttribute::UV,
+        glEnableVertexAttribArray((int)ProgramAttribute::UV);
+        glVertexAttribPointer((int)ProgramAttribute::UV,
             2, GL_FLOAT, false, sizeof(Vertex), (void*)offsetof(Vertex, uv));
     }
 

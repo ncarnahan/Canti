@@ -22,96 +22,44 @@ namespace Graphics
 
     Shader::Shader()
     {
-        program = 0;
+        shader = 0;
     }
 
     Shader::~Shader()
     {
-        if (program != 0)
+        if (shader != 0)
         {
-            glDeleteProgram(program);
+            glDeleteShader(shader);
         }
     }
 
-    bool Shader::LoadFromFiles(std::string vertFile, std::string fragFile)
+    bool Shader::LoadFromFile(ShaderType type, const char* fileName)
     {
         //Read source
-        auto vertContents = File::ReadAllText(vertFile);
-        auto fragContents = File::ReadAllText(fragFile);
+        auto contents = File::ReadAllText(fileName);
 
-        return LoadFromStrings(*vertContents, *fragContents);
+        return LoadFromString(type, contents->c_str());
     }
 
-    bool Shader::LoadFromStrings(std::string& vertContents, std::string& fragContents)
+    bool Shader::LoadFromString(ShaderType type, const char* source)
     {
-        program = glCreateProgram();
-        auto vertexShader = glCreateShader(GL_VERTEX_SHADER);
-        auto fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
- 
-        //Load shaders
-        const char* vertSource = vertContents.c_str();
-        const char* fragSource = fragContents.c_str();
-        glShaderSource(vertexShader, 1, &vertSource, NULL);
-        glShaderSource(fragmentShader, 1, &fragSource, NULL);
- 
-        //Compile the shaders
+        //Create
+        shader = glCreateShader((GLuint)type);
+
+        //Load source
+        glShaderSource(shader, 1, &source, NULL);
+
+        //Compile
         int success;
-        glCompileShader(vertexShader);
-        glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
+        glCompileShader(shader);
+        glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
         if (!success)
         {
-            std::cout << "Vertex shader failed to compile.\n";
-            std::cout << GetShaderCompileError(vertexShader);
-            goto error;
+            std::cout << "Shader failed to compile.\n";
+            std::cout << GetShaderCompileError(shader);
+            return false;
         }
-
-        glCompileShader(fragmentShader);
-        glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
-        if (!success)
-        {
-            std::cout << "Fragment shader failed to compile.\n";
-            std::cout << GetShaderCompileError(fragmentShader);
-            goto error;
-        }
- 
-        //Attach shaders to program
-        glAttachShader(program, vertexShader);
-        glAttachShader(program, fragmentShader);
- 
-        //Bind the attributes to a standard location
-        glBindAttribLocation(program, (int)ShaderAttribute::Position, "in_position");
-        glBindAttribLocation(program, (int)ShaderAttribute::Normal, "in_normal");
-        glBindAttribLocation(program, (int)ShaderAttribute::UV, "in_uv");
-
-        //Link the program
-        glLinkProgram(program);
-        glGetProgramiv(program, GL_LINK_STATUS, &success);
-        if (!success)
-        {
-            std::cout << "Program failed to link.\n";
-            goto error;
-        }
-
-        glDeleteShader(vertexShader);
-        glDeleteShader(fragmentShader);
 
         return true;
-
-error:
-        //Delete the gl objects
-        glDeleteShader(vertexShader);
-        glDeleteShader(fragmentShader);
-        glDeleteProgram(program);
-        return false;
-    }
-
-    void Shader::Start()
-    {
-        glUseProgram(program);
-    }
-
-    void Shader::Stop()
-    {
-        glUseProgram(0);
     }
 }

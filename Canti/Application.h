@@ -2,7 +2,7 @@
 #define CANTI_APPLICATION_H
 
 #include <SDL.h>
-#include <Graphics/Shader.h>
+#include <Graphics/Program.h>
 #include <Graphics/Texture.h>
 #include <Graphics/StaticMesh.h>
 #include <Graphics/Material.h>
@@ -21,7 +21,7 @@ private:
     Input _input;
     FpsCamera _camera;
 
-    Shader _shader;
+    Program _program;
 
     StaticMesh _suzanneMesh;
     Texture _suzanneTexture;

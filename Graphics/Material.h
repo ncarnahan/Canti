@@ -1,16 +1,17 @@
 #ifndef GRAPHICS_MATERIAL_H
 #define GRAPHICS_MATERIAL_H
 
-#include "Shader.h"
 #include "Texture.h"
 #include <vector>
 
 namespace Graphics
 {
+    class Program;
+
     class Material
     {
     private:
-        Shader* _shader;
+        Program* _program;
 
         //The first item of the pair is the shader uniform location
         std::vector<std::pair<GLint, Texture&>> _textures;
@@ -20,7 +21,7 @@ namespace Graphics
 
         void Start();
 
-        inline void SetShader(Shader& shader) { _shader = &shader; }
+        inline void SetShader(Program& program) { _program = &program; }
         void SetTexture(GLint location, Texture& texture);
     };
 }
