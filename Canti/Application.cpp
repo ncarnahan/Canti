@@ -49,7 +49,7 @@ void Application::Init()
     _camera.SetWindow(_window);
     _camera.SetPosition(Vector3(0, 2, 0));
 
-    _program.LoadFromFiles("Data/Diffuse.vert", "Data/Diffuse.frag");
+    _program.LoadFromFiles("Data/Diffuse.vert", "Data/Specular.frag");
     _program.Start();
 
     _suzanneMesh.LoadObjFile("Data/Suzanne.obj");
@@ -117,6 +117,9 @@ void Application::Render()
     glUniform1f(_program.GetUniformLocation("light.intensity"), 1.0f);
     glUniform3fv(_program.GetUniformLocation("light.direction"), 1, &direction[0]);
     glUniform3fv(_program.GetUniformLocation("light.color"), 1, &color[0]);
+
+    Vector3 camPos = _camera.GetPosition();
+    glUniform3fv(_program.GetUniformLocation("in_eyePosition"), 1, &camPos[0]);
 
     modelMatrix = Matrix4x4::FromPosition(Vector3(0, -2, 0));
     pvm = pv * modelMatrix;

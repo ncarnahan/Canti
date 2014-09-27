@@ -1,5 +1,6 @@
 #version 440
 
+uniform vec3 in_eyePosition;
 uniform mat4 in_matrixPVM;
 uniform mat4 in_matrixModel;
 uniform mat4 in_matrixView;
@@ -32,12 +33,17 @@ void main() {
     float NdotL = max(dot(normalDir, lightDir), 0);
     vec3 diffuse = light.intensity * light.color * NdotL;
 
-    vec3 lighting = diffuse + ambient;
+    vec3 eyeVec = normalize(in_eyePosition - position);
+    vec3 halfVec = normalize(eyeVec + lightDir);
+    float NdotH = max(dot(normalDir, halfVec), 0);
+    vec3 specular = diffuse * pow(NdotH, 32);
+
+    vec3 lighting = diffuse + specular + ambient;
 
 
     //Gamma correction
     vec3 gamma = vec3(1.0 / 2.2);
     vec3 final = pow(texColor * lighting, gamma);
 
-    out_color = vec4(final, 0);
+    out_color = vec4(final, 1);
 }
