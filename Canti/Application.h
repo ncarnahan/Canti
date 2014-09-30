@@ -10,6 +10,7 @@ using namespace Graphics;
 #include <Utils/Input.h>
 using namespace Utils;
 #include "FpsCamera.h"
+#include "Entity.h"
 
 class Application
 {
@@ -30,6 +31,8 @@ private:
     StaticMesh _roomMesh;
     Texture _roomTexture;
     Material _roomMaterial;
+
+    std::vector<Entity> _entities;
 
 
 public:

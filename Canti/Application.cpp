@@ -68,6 +68,30 @@ void Application::Init()
     _roomMaterial.SetShader(_program);
     _roomMaterial.SetTexture(_program.GetUniformLocation("tex_diffuse"), _roomTexture);
 
+    {
+        Entity entity;
+        entity.mesh = &_roomMesh;
+        entity.material = &_roomMaterial;
+        entity.position = Vector3(0, -2, 0);
+        _entities.push_back(entity);
+    }
+
+    {
+        Entity entity;
+        entity.mesh = &_suzanneMesh;
+        entity.material = &_suzanneMaterial;
+        entity.position = Vector3(0, 0, -4);
+        _entities.push_back(entity);
+    }
+
+    {
+        Entity entity;
+        entity.mesh = &_suzanneMesh;
+        entity.material = &_suzanneMaterial;
+        entity.position = Vector3(6, 0, 0);
+        _entities.push_back(entity);
+    }
+
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
     glCullFace(GL_BACK);
@@ -109,7 +133,6 @@ void Application::Render()
     glUniformMatrix4fv(_program.GetUniformLocation("in_matrixProj"), 1, false, &projection[0]);
     glUniformMatrix4fv(_program.GetUniformLocation("in_matrixView"), 1, false, &view[0]);
 
-    Matrix4x4 modelMatrix;
     Matrix4x4 pvm;
 
     Vector3 direction = Quaternion::AngleAxis((float)SDL_GetTicks() / 100.0f, Vector3::up) * Vector3::forward + Vector3(0, 0.2f, 0);
@@ -121,25 +144,20 @@ void Application::Render()
     Vector3 camPos = _camera.GetPosition();
     glUniform3fv(_program.GetUniformLocation("in_eyePosition"), 1, &camPos[0]);
 
-    modelMatrix = Matrix4x4::FromPosition(Vector3(0, -2, 0));
-    pvm = pv * modelMatrix;
-    glUniformMatrix4fv(_program.GetUniformLocation("in_matrixModel"), 1, false, &modelMatrix[0]);
-    glUniformMatrix4fv(_program.GetUniformLocation("in_matrixPVM"), 1, false, &pvm[0]);
-    _roomMaterial.Start();
-    _roomMesh.Draw();
+    _entities[1].rotation = Quaternion::AngleAxis((float)SDL_GetTicks() / 10.f, Vector3::left);
 
-    modelMatrix = Matrix4x4::FromTransform(Vector3(0, 0, -4), Quaternion::AngleAxis((float)SDL_GetTicks() / 10.f, Vector3::left), Vector3::one);
-    pvm = pv * modelMatrix;
-    glUniformMatrix4fv(_program.GetUniformLocation("in_matrixModel"), 1, false, &modelMatrix[0]);
-    glUniformMatrix4fv(_program.GetUniformLocation("in_matrixPVM"), 1, false, &pvm[0]);
-    _suzanneMaterial.Start();
-    _suzanneMesh.Draw();
+    for (auto& entity : _entities)
+    {
+        auto modelMatrix = Matrix4x4::FromTransform(
+            entity.position, entity.rotation, Vector3(entity.scale));
+        pvm = pv * modelMatrix;
 
-    modelMatrix = Matrix4x4::FromPosition(Vector3(6, 0, 0));
-    pvm = pv * modelMatrix;
-    glUniformMatrix4fv(_program.GetUniformLocation("in_matrixModel"), 1, false, &modelMatrix[0]);
-    glUniformMatrix4fv(_program.GetUniformLocation("in_matrixPVM"), 1, false, &pvm[0]);
-    _suzanneMesh.Draw();
+        glUniformMatrix4fv(_program.GetUniformLocation("in_matrixModel"), 1, false, &modelMatrix[0]);
+        glUniformMatrix4fv(_program.GetUniformLocation("in_matrixPVM"), 1, false, &pvm[0]);
+
+        entity.material->Start();
+        entity.mesh->Draw();
+    }
     
     auto error = glGetError();
     if (error != GL_NO_ERROR)
