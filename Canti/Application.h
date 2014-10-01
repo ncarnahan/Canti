@@ -5,6 +5,7 @@
 #include <Graphics/Program.h>
 #include <Graphics/Texture.h>
 #include <Graphics/StaticMesh.h>
+#include <Graphics/Light.h>
 #include <Graphics/Material.h>
 using namespace Graphics;
 #include <Utils/Input.h>
@@ -33,6 +34,7 @@ private:
     Material _roomMaterial;
 
     std::vector<Entity> _entities;
+    std::vector<Light> _lights;
 
 
 public:

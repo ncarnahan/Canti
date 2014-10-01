@@ -92,6 +92,24 @@ void Application::Init()
         _entities.push_back(entity);
     }
 
+    {
+        Light light;
+        light.Directional(Vector3(1, 1, 1), Vector3::one, 0.02f);
+        _lights.push_back(light);
+    }
+
+    {
+        Light light;
+        light.Point(Vector3::zero, Vector3(1, 0, 0), 1.0f, 5.0f);
+        _lights.push_back(light);
+    }
+
+    {
+        Light light;
+        light.Point(Vector3(0, 0, -6), Vector3(0, 0, 1), 8.0f, 8.0f);
+        _lights.push_back(light);
+    }
+
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
     glCullFace(GL_BACK);
@@ -133,30 +151,57 @@ void Application::Render()
     glUniformMatrix4fv(_program.GetUniformLocation("in_matrixProj"), 1, false, &projection[0]);
     glUniformMatrix4fv(_program.GetUniformLocation("in_matrixView"), 1, false, &view[0]);
 
-    Matrix4x4 pvm;
-
-    Vector3 direction = Quaternion::AngleAxis((float)SDL_GetTicks() / 100.0f, Vector3::up) * Vector3::forward + Vector3(0, 0.2f, 0);
-    Vector3 color = Vector3(1, 1, 0.9f);
-    glUniform1f(_program.GetUniformLocation("light.intensity"), 1.0f);
-    glUniform3fv(_program.GetUniformLocation("light.direction"), 1, &direction[0]);
-    glUniform3fv(_program.GetUniformLocation("light.color"), 1, &color[0]);
-
     Vector3 camPos = _camera.GetPosition();
     glUniform3fv(_program.GetUniformLocation("in_eyePosition"), 1, &camPos[0]);
 
     _entities[1].rotation = Quaternion::AngleAxis((float)SDL_GetTicks() / 10.f, Vector3::left);
+    
+
+
+    Matrix4x4 modelMatrix;
+    Matrix4x4 pvm;
 
     for (auto& entity : _entities)
     {
-        auto modelMatrix = Matrix4x4::FromTransform(
+        //Model matrix
+        modelMatrix = Matrix4x4::FromTransform(
             entity.position, entity.rotation, Vector3(entity.scale));
+
         pvm = pv * modelMatrix;
 
+        //Matrices
         glUniformMatrix4fv(_program.GetUniformLocation("in_matrixModel"), 1, false, &modelMatrix[0]);
         glUniformMatrix4fv(_program.GetUniformLocation("in_matrixPVM"), 1, false, &pvm[0]);
 
-        entity.material->Start();
-        entity.mesh->Draw();
+
+        //Disable blending; we're drawing the first one
+        glDisable(GL_BLEND);
+        glBlendFunc(GL_ONE, GL_ONE);
+        glDepthFunc(GL_LESS);
+
+
+        for (auto& light : _lights)
+        {
+            //Light uniforms
+            glUniform1i(_program.GetUniformLocation("light.type"), (int)light.GetType());
+
+            glUniform3fv(_program.GetUniformLocation("light.position"), 1, &light.GetPosition()[0]);
+            glUniform3fv(_program.GetUniformLocation("light.direction"), 1, &light.GetDirection()[0]);
+            glUniform3fv(_program.GetUniformLocation("light.color"), 1, &light.GetColor()[0]);
+            
+            glUniform1f(_program.GetUniformLocation("light.intensity"), light.GetIntensity());
+            glUniform1f(_program.GetUniformLocation("light.radius"), light.GetRadius());
+
+
+            //Draw
+            entity.material->Start();
+            entity.mesh->Draw();
+
+
+            //Additive lighting; enable blending and allow equal depth
+            glEnable(GL_BLEND);
+            glDepthFunc(GL_LEQUAL);
+        }
     }
     
     auto error = glGetError();
