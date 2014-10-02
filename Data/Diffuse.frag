@@ -7,6 +7,7 @@ uniform mat4 in_matrixProj;
 uniform sampler2D tex_diffuse;
 struct Light
 {
+    vec3 ambient;
     vec3 position;
     vec3 direction;
     vec3 color;
@@ -28,7 +29,7 @@ void main() {
 
 
     //Lighting
-    vec3 ambient = vec3(0.001373);
+    vec3 ambient = pow(light.ambient, vec3(2.2));
     vec3 diffuse = vec3(0);
 
     if (light.type == 0) {

@@ -156,7 +156,9 @@ void Application::Render()
 
     _entities[1].rotation = Quaternion::AngleAxis((float)SDL_GetTicks() / 10.f, Vector3::left);
     
-
+    
+    Vector3 ambient(0.1f, 0.1f, 0.1f);
+    Vector3 zero;
 
     Matrix4x4 modelMatrix;
     Matrix4x4 pvm;
@@ -178,6 +180,10 @@ void Application::Render()
         glDisable(GL_BLEND);
         glBlendFunc(GL_ONE, GL_ONE);
         glDepthFunc(GL_LESS);
+
+        
+        //Ambient lighting on first pass
+        glUniform3fv(_program.GetUniformLocation("light.ambient"), 1, &ambient[0]);
 
 
         for (auto& light : _lights)
@@ -201,6 +207,9 @@ void Application::Render()
             //Additive lighting; enable blending and allow equal depth
             glEnable(GL_BLEND);
             glDepthFunc(GL_LEQUAL);
+
+            //Disable ambient for future passes
+            glUniform3fv(_program.GetUniformLocation("light.ambient"), 1, &zero[0]);
         }
     }
     
