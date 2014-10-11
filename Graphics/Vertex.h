@@ -13,6 +13,7 @@ namespace Graphics
     public:
         Vector3 position;
         Vector3 normal;
+        Vector3 tangent;
         Vector2 uv;
     };
 }

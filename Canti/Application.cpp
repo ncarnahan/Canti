@@ -49,24 +49,40 @@ void Application::Init()
     _camera.SetWindow(_window);
     _camera.SetPosition(Vector3(0, 2, 0));
 
-    _program.LoadFromFiles("Data/Diffuse.vert", "Data/Specular.frag");
-    _program.Start();
+    _diffuseProgram.LoadFromFiles("Data/Diffuse.vert", "Data/Diffuse.frag");
+    _specularProgram.LoadFromFiles("Data/Specular.vert", "Data/Specular.frag");
+    _bumpedDiffuseProgram.LoadFromFiles("Data/BumpedDiffuse.vert", "Data/BumpedDiffuse.frag");
+    _bumpedSpecularProgram.LoadFromFiles("Data/Diffuse.vert", "Data/Diffuse.frag");
+    //_bumpedSpecularProgram.LoadFromFiles("Data/BumpedSpecular.vert", "Data/BumpedSpecular.frag");
 
     _suzanneMesh.LoadObjFile("Data/Suzanne.obj");
     _roomMesh.LoadObjFile("Data/Room.obj");
+    _cyllinderMesh.LoadObjFile("Data/NormalMapTest.obj");
 
-    TextureLoadSettings textureLoadSettings;
-    textureLoadSettings.useSrgbColorSpace = true;
-    textureLoadSettings.generateMipmaps = true;
-    textureLoadSettings.filter = Graphics::TextureFilter::Trilinear;
-    _suzanneTexture.Load("Data/Texture.png", textureLoadSettings);
-    _roomTexture.Load("Data/Tiles.png", textureLoadSettings);
+    TextureLoadSettings diffuseSettings;
+    diffuseSettings.useSrgbColorSpace = true;
+    diffuseSettings.generateMipmaps = true;
+    diffuseSettings.filter = Graphics::TextureFilter::Trilinear;
+    _suzanneTexture.Load("Data/Texture.png", diffuseSettings);
+    _roomTexture.Load("Data/Tiles.png", diffuseSettings);
 
-    _suzanneMaterial.SetShader(_program);
-    _suzanneMaterial.SetTexture(_program.GetUniformLocation("tex_diffuse"), _suzanneTexture);
+    TextureLoadSettings normalSettings;
+    normalSettings.useSrgbColorSpace = false;
+    normalSettings.generateMipmaps = true;
+    normalSettings.filter = Graphics::TextureFilter::Trilinear;
+    _cyllinderNormalTexture.Load("Data/NormalMapTest.png", normalSettings);
+    _roomNormalTexture.Load("Data/TilesNormal.png", normalSettings);
 
-    _roomMaterial.SetShader(_program);
-    _roomMaterial.SetTexture(_program.GetUniformLocation("tex_diffuse"), _roomTexture);
+    _suzanneMaterial.SetProgram(_specularProgram);
+    _suzanneMaterial.SetTexture(_specularProgram.GetUniformLocation("tex_diffuse"), _suzanneTexture);
+
+    _roomMaterial.SetProgram(_bumpedDiffuseProgram);
+    _roomMaterial.SetTexture(_bumpedDiffuseProgram.GetUniformLocation("tex_diffuse"), _roomTexture);
+    _roomMaterial.SetTexture(_bumpedDiffuseProgram.GetUniformLocation("tex_normal"), _roomNormalTexture);
+
+    _cyllinderMaterial.SetProgram(_bumpedDiffuseProgram);
+    _cyllinderMaterial.SetTexture(_bumpedDiffuseProgram.GetUniformLocation("tex_diffuse"), _roomTexture);
+    _cyllinderMaterial.SetTexture(_bumpedDiffuseProgram.GetUniformLocation("tex_normal"), _cyllinderNormalTexture);
 
     {
         Entity entity;
@@ -89,14 +105,23 @@ void Application::Init()
         entity.mesh = &_suzanneMesh;
         entity.material = &_suzanneMaterial;
         entity.position = Vector3(6, 0, 0);
+        entity.scale = 0.05f;
         _entities.push_back(entity);
     }
 
     {
-        Light light;
-        light.Directional(Vector3(1, 1, 1), Vector3::one, 0.02f);
-        _lights.push_back(light);
+        Entity entity;
+        entity.mesh = &_cyllinderMesh;
+        entity.material = &_cyllinderMaterial;
+        entity.position = Vector3(0, -1, 2);
+        _entities.push_back(entity);
     }
+
+    /*{
+        Light light;
+        light.Directional(Vector3(0.5f, 1, 1.5f), Vector3::one, 0.02f);
+        _lights.push_back(light);
+    }*/
 
     {
         Light light;
@@ -104,11 +129,11 @@ void Application::Init()
         _lights.push_back(light);
     }
 
-    {
+    /*{
         Light light;
         light.Point(Vector3(0, 0, -6), Vector3(0, 0, 1), 8.0f, 8.0f);
         _lights.push_back(light);
-    }
+    }*/
 
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
@@ -148,13 +173,18 @@ void Application::Render()
     auto view = _camera.GetViewMatrix();
     auto pv = projection * view;
 
-    glUniformMatrix4fv(_program.GetUniformLocation("in_matrixProj"), 1, false, &projection[0]);
-    glUniformMatrix4fv(_program.GetUniformLocation("in_matrixView"), 1, false, &view[0]);
-
     Vector3 camPos = _camera.GetPosition();
-    glUniform3fv(_program.GetUniformLocation("in_eyePosition"), 1, &camPos[0]);
 
-    _entities[1].rotation = Quaternion::AngleAxis((float)SDL_GetTicks() / 10.f, Vector3::left);
+    _entities[1].rotation = Quaternion::AngleAxis((float)SDL_GetTicks() / 10.0f, Vector3::left);
+    _entities[1].scale = Math::SinDeg((float)SDL_GetTicks() / 11.0f) / 2 + 1;
+
+    if (_input.KeyDown(SDL_SCANCODE_I)) { _lights[0].position.z += 0.05f; }
+    if (_input.KeyDown(SDL_SCANCODE_K)) { _lights[0].position.z -= 0.05f; }
+    if (_input.KeyDown(SDL_SCANCODE_U)) { _lights[0].position.y += 0.05f; }
+    if (_input.KeyDown(SDL_SCANCODE_O)) { _lights[0].position.y -= 0.05f; }
+    if (_input.KeyDown(SDL_SCANCODE_J)) { _lights[0].position.x += 0.05f; }
+    if (_input.KeyDown(SDL_SCANCODE_L)) { _lights[0].position.x -= 0.05f; }
+    _entities[2].position = _lights[0].position;
     
     
     Vector3 ambient(0.1f, 0.1f, 0.1f);
@@ -165,6 +195,16 @@ void Application::Render()
 
     for (auto& entity : _entities)
     {
+        //Use the material
+        entity.material->Start();
+
+        auto program = entity.material->GetProgram();
+
+        //TEMP: Use UBO
+        glUniformMatrix4fv(program->GetUniformLocation("in_matrixProj"), 1, false, &projection[0]);
+        glUniformMatrix4fv(program->GetUniformLocation("in_matrixView"), 1, false, &view[0]);
+        glUniform3fv(program->GetUniformLocation("in_eyePosition"), 1, &camPos[0]);
+
         //Model matrix
         modelMatrix = Matrix4x4::FromTransform(
             entity.position, entity.rotation, Vector3(entity.scale));
@@ -172,8 +212,8 @@ void Application::Render()
         pvm = pv * modelMatrix;
 
         //Matrices
-        glUniformMatrix4fv(_program.GetUniformLocation("in_matrixModel"), 1, false, &modelMatrix[0]);
-        glUniformMatrix4fv(_program.GetUniformLocation("in_matrixPVM"), 1, false, &pvm[0]);
+        glUniformMatrix4fv(program->GetUniformLocation("in_matrixModel"), 1, false, &modelMatrix[0]);
+        glUniformMatrix4fv(program->GetUniformLocation("in_matrixPVM"), 1, false, &pvm[0]);
 
 
         //Disable blending; we're drawing the first one
@@ -183,24 +223,22 @@ void Application::Render()
 
         
         //Ambient lighting on first pass
-        glUniform3fv(_program.GetUniformLocation("light.ambient"), 1, &ambient[0]);
-
+        glUniform3fv(program->GetUniformLocation("light.ambient"), 1, &ambient[0]);
 
         for (auto& light : _lights)
         {
             //Light uniforms
-            glUniform1i(_program.GetUniformLocation("light.type"), (int)light.GetType());
+            glUniform1i(program->GetUniformLocation("light.type"), (int)light.type);
 
-            glUniform3fv(_program.GetUniformLocation("light.position"), 1, &light.GetPosition()[0]);
-            glUniform3fv(_program.GetUniformLocation("light.direction"), 1, &light.GetDirection()[0]);
-            glUniform3fv(_program.GetUniformLocation("light.color"), 1, &light.GetColor()[0]);
+            glUniform3fv(program->GetUniformLocation("light.position"), 1, &light.position[0]);
+            glUniform3fv(program->GetUniformLocation("light.direction"), 1, &light.direction[0]);
+            glUniform3fv(program->GetUniformLocation("light.color"), 1, &light.color[0]);
             
-            glUniform1f(_program.GetUniformLocation("light.intensity"), light.GetIntensity());
-            glUniform1f(_program.GetUniformLocation("light.radius"), light.GetRadius());
-
+            glUniform1f(program->GetUniformLocation("light.intensity"), light.intensity);
+            glUniform1f(program->GetUniformLocation("light.radius"), light.radius);
+            
 
             //Draw
-            entity.material->Start();
             entity.mesh->Draw();
 
 
@@ -209,7 +247,7 @@ void Application::Render()
             glDepthFunc(GL_LEQUAL);
 
             //Disable ambient for future passes
-            glUniform3fv(_program.GetUniformLocation("light.ambient"), 1, &zero[0]);
+            glUniform3fv(program->GetUniformLocation("light.ambient"), 1, &zero[0]);
         }
     }
     

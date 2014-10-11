@@ -2,44 +2,36 @@
 
 namespace Graphics
 {
-    Light::Light()
-    {
-    }
-
-    Light::~Light()
-    {
-    }
-
     void Light::Directional(Vector3 direction, Vector3 color, float intensity)
     {
-        _type = LightType::Directional;
+        this->type = LightType::Directional;
 
-        _direction = direction;
-        _color = color;
-        _intensity = intensity;
+        this->direction = direction;
+        this->color = color;
+        this->intensity = intensity;
     }
 
     void Light::Point(Vector3 position, Vector3 color, float intensity, float radius)
     {
-        _type = LightType::Point;
+        this->type = LightType::Point;
 
-        _position = position;
-        _color = color;
-        _intensity = intensity;
-        _radius = radius;
+        this->position = position;
+        this->color = color;
+        this->intensity = intensity;
+        this->radius = radius;
     }
 
     void Light::Spot(Vector3 position, Vector3 direction, Vector3 color,
         float intensity, float radius, float angle, float exponent)
     {
-        _type = LightType::Spot;
+        this->type = LightType::Spot;
 
-        _position = position;
-        _direction = direction;
-        _color = color;
-        _intensity = intensity;
-        _radius = radius;
-        _angle = angle;
-        _exponent = exponent;
+        this->position = position;
+        this->direction = direction;
+        this->color = color;
+        this->intensity = intensity;
+        this->radius = radius;
+        this->angle = angle;
+        this->exponent = exponent;
     }
 }

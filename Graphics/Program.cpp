@@ -61,6 +61,7 @@ namespace Graphics
         //Bind the attributes to a standard location
         glBindAttribLocation(program, (GLuint)ProgramAttribute::Position, "in_position");
         glBindAttribLocation(program, (GLuint)ProgramAttribute::Normal, "in_normal");
+        glBindAttribLocation(program, (GLuint)ProgramAttribute::Tangent, "in_tangent");
         glBindAttribLocation(program, (GLuint)ProgramAttribute::UV, "in_uv");
 
         //Link the program

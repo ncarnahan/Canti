@@ -15,6 +15,9 @@ namespace Graphics
         std::vector<Vector3>& normals,
         std::vector<Vector2>& uvs,
         std::vector<std::array<std::array<int, 3>, 3>>& faces);
+    void CalculateTangents(
+        std::vector<Vertex>& vertices,
+        std::vector<GLuint>& indices);
     void ConvertObjToMesh(
         //In
         std::vector<Vector3>& positions,
@@ -56,6 +59,13 @@ namespace Graphics
         ConvertObjToMesh(positions, normals, uvs, faces, vertices, indices);
 
 
+        //Calculate tangents if possible
+        if (uvs.size() > 0 && normals.size() > 0)
+        {
+            CalculateTangents(vertices, indices);
+        }
+
+
         //Generate a VAO, create VBOs, etc.
         BufferData(vertices, indices);
         
@@ -89,6 +99,10 @@ namespace Graphics
         glEnableVertexAttribArray((int)ProgramAttribute::Normal);
         glVertexAttribPointer((int)ProgramAttribute::Normal,
             3, GL_FLOAT, false, sizeof(Vertex), (void*)offsetof(Vertex, normal));
+
+        glEnableVertexAttribArray((int)ProgramAttribute::Tangent);
+        glVertexAttribPointer((int)ProgramAttribute::Tangent,
+            3, GL_FLOAT, false, sizeof(Vertex), (void*)offsetof(Vertex, tangent));
 
         glEnableVertexAttribArray((int)ProgramAttribute::UV);
         glVertexAttribPointer((int)ProgramAttribute::UV,
@@ -193,6 +207,71 @@ namespace Graphics
 
         return true;
     }
+
+
+    void CalculateTangents(
+        std::vector<Vertex>& vertices,
+        std::vector<GLuint>& indices)
+    {
+        std::vector<Vector3> tan1(vertices.size());
+        std::vector<Vector3> tan2(vertices.size());
+
+        //http://www.terathon.com/code/tangent.html
+        for (size_t index = 0; index < indices.size(); index += 3)
+        {
+            size_t index1 = indices[index];
+            size_t index2 = indices[index + 1];
+            size_t index3 = indices[index + 2];
+
+            Vector3 pos1 = vertices[index1].position;
+            Vector3 pos2 = vertices[index2].position;
+            Vector3 pos3 = vertices[index3].position;
+
+            Vector2 uv1 = vertices[index1].uv;
+            Vector2 uv2 = vertices[index2].uv;
+            Vector2 uv3 = vertices[index3].uv;
+
+            Vector3 xyz1 = pos2 - pos1;
+            Vector3 xyz2 = pos3 - pos1;
+
+            Vector2 st1 = uv2 - uv1;
+            Vector2 st2 = uv3 - uv1;
+
+            float r = 1.0f / (st1.x * st2.y - st2.x * st1.y);
+            Vector3 sdir(
+                (st2.y * xyz1.x - st1.y * xyz2.x) * r,
+                (st2.y * xyz1.y - st1.y * xyz2.y) * r,
+                (st2.y * xyz1.z - st1.y * xyz2.z) * r);
+            Vector3 tdir(
+                (st1.x * xyz2.x - st2.x * xyz1.x) * r,
+                (st1.x * xyz2.y - st2.x * xyz1.y) * r,
+                (st1.x * xyz2.z - st2.x * xyz1.z) * r);
+
+            tan1[index1] += sdir;
+            tan1[index2] += sdir;
+            tan1[index3] += sdir;
+
+            tan2[index1] += sdir;
+            tan2[index2] += sdir;
+            tan2[index3] += sdir;
+        }
+
+        for (size_t i = 0; i < vertices.size(); i++)
+        {
+            Vector3 normal = vertices[i].normal;
+            Vector3 tangent = tan1[i];
+
+            tangent = (tangent - normal * Vector3::Dot(normal, tangent)).Normalized();
+
+            if (Vector3::Dot(Vector3::Cross(normal, tangent), tan2[i]) < 0.0f)
+            {
+                tangent = -tangent;
+            }
+
+            vertices[i].tangent = tangent;
+        }
+    }
+
 
     struct VertexIndicesHash
     {

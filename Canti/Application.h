@@ -23,7 +23,10 @@ private:
     Input _input;
     FpsCamera _camera;
 
-    Program _program;
+    Program _diffuseProgram;
+    Program _specularProgram;
+    Program _bumpedDiffuseProgram;
+    Program _bumpedSpecularProgram;
 
     StaticMesh _suzanneMesh;
     Texture _suzanneTexture;
@@ -31,7 +34,12 @@ private:
     
     StaticMesh _roomMesh;
     Texture _roomTexture;
+    Texture _roomNormalTexture;
     Material _roomMaterial;
+
+    StaticMesh _cyllinderMesh;
+    Texture _cyllinderNormalTexture;
+    Material _cyllinderMaterial;
 
     std::vector<Entity> _entities;
     std::vector<Light> _lights;

@@ -34,7 +34,7 @@ dlldata.c
 *_i.h
 *.ilk
 *.meta
-*.obj
+# *.obj
 *.pch
 *.pdb
 *.pgc
@@ -185,7 +185,8 @@ FakesAssemblies/
 .LSOverride
 
 # Icon must ends with two \r.
-Icon
+Icon
+
 
 # Thumbnails
 ._*

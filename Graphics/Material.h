@@ -21,8 +21,10 @@ namespace Graphics
 
         void Start();
 
-        inline void SetShader(Program& program) { _program = &program; }
+        inline void SetProgram(Program& program) { _program = &program; }
         void SetTexture(GLint location, Texture& texture);
+
+        inline Program* GetProgram() { return _program; }
     };
 }
 

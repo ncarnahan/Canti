@@ -12,6 +12,7 @@ namespace Graphics
     {
         Position,
         Normal,
+        Tangent,
         UV,
     };
 
