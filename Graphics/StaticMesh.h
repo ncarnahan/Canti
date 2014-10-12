@@ -24,6 +24,7 @@ namespace Graphics
         void BufferData(std::vector<Vertex>& vertices, std::vector<GLuint>& indices);
 
         void Draw();
+        void DrawPoints();
 
     private:
         void GenerateVao();

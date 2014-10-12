@@ -19,7 +19,8 @@ void FpsCamera::Update(float dt, Input& input)
         _rotation.x -= sensitivity * input.GetRelativeMouseX();
         _rotation.y = Math::Clamp(_rotation.y - sensitivity * input.GetRelativeMouseY(), -90.0f, 90.0f);
 
-        const float speed = 8.0f;
+        float speed = 8.0f;
+        if (input.KeyDown(SDL_SCANCODE_LSHIFT)) { speed *= 0.1f; }
         float distance = speed * dt;
 
         Quaternion rotation = GetRotation();

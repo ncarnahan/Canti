@@ -4,7 +4,8 @@
 #include <Graphics/OpenGL.h>
 
 Application::Application() :
-    _running(true)
+    _running(true),
+    _showTangents(false)
 {
     //Initialize SDL
     if (SDL_Init(SDL_INIT_EVERYTHING) != 0)
@@ -54,6 +55,7 @@ void Application::Init()
     _bumpedDiffuseProgram.LoadFromFiles("Data/BumpedDiffuse.vert", "Data/BumpedDiffuse.frag");
     _bumpedSpecularProgram.LoadFromFiles("Data/Diffuse.vert", "Data/Diffuse.frag");
     //_bumpedSpecularProgram.LoadFromFiles("Data/BumpedSpecular.vert", "Data/BumpedSpecular.frag");
+    _tangentProgram.LoadFromFiles("Data/TangentVisualization.vert", "Data/TangentVisualization.geom", "Data/TangentVisualization.frag");
 
     _suzanneMesh.LoadObjFile("Data/Suzanne.obj");
     _roomMesh.LoadObjFile("Data/Room.obj");
@@ -117,23 +119,23 @@ void Application::Init()
         _entities.push_back(entity);
     }
 
-    /*{
-        Light light;
-        light.Directional(Vector3(0.5f, 1, 1.5f), Vector3::one, 0.02f);
-        _lights.push_back(light);
-    }*/
-
     {
         Light light;
         light.Point(Vector3::zero, Vector3(1, 0, 0), 1.0f, 5.0f);
         _lights.push_back(light);
     }
 
-    /*{
+    {
+        Light light;
+        light.Directional(Vector3(0.5f, 1, 1.5f), Vector3::one, 0.02f);
+        _lights.push_back(light);
+    }
+
+    {
         Light light;
         light.Point(Vector3(0, 0, -6), Vector3(0, 0, 1), 8.0f, 8.0f);
         _lights.push_back(light);
-    }*/
+    }
 
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
@@ -152,6 +154,8 @@ void Application::Update()
             _running = false;
         }
     }
+
+    if (_input.KeyPressed(SDL_SCANCODE_T)) { _showTangents = !_showTangents; }
 
     Simulate();
     Render();
@@ -248,6 +252,18 @@ void Application::Render()
 
             //Disable ambient for future passes
             glUniform3fv(program->GetUniformLocation("light.ambient"), 1, &zero[0]);
+        }
+
+        //Tangent Visualization
+        if (_showTangents)
+        {
+            program = &_tangentProgram;
+            program->Start();
+            glUniformMatrix4fv(program->GetUniformLocation("in_matrixProj"), 1, false, &projection[0]);
+            glUniformMatrix4fv(program->GetUniformLocation("in_matrixView"), 1, false, &view[0]);
+            glUniformMatrix4fv(program->GetUniformLocation("in_matrixModel"), 1, false, &modelMatrix[0]);
+            glUniformMatrix4fv(program->GetUniformLocation("in_matrixPVM"), 1, false, &pvm[0]);
+            entity.mesh->DrawPoints();
         }
     }
     

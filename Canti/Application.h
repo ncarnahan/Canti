@@ -27,6 +27,8 @@ private:
     Program _specularProgram;
     Program _bumpedDiffuseProgram;
     Program _bumpedSpecularProgram;
+    Program _tangentProgram;
+    bool _showTangents;
 
     StaticMesh _suzanneMesh;
     Texture _suzanneTexture;

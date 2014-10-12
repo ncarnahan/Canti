@@ -14,6 +14,7 @@ namespace Graphics
         Vector3 position;
         Vector3 normal;
         Vector3 tangent;
+        float tangentHandedness;    //TODO: Make a real Vector4 class...
         Vector2 uv;
     };
 }

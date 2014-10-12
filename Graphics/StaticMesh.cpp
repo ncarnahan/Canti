@@ -102,7 +102,7 @@ namespace Graphics
 
         glEnableVertexAttribArray((int)ProgramAttribute::Tangent);
         glVertexAttribPointer((int)ProgramAttribute::Tangent,
-            3, GL_FLOAT, false, sizeof(Vertex), (void*)offsetof(Vertex, tangent));
+            4, GL_FLOAT, false, sizeof(Vertex), (void*)offsetof(Vertex, tangent));
 
         glEnableVertexAttribArray((int)ProgramAttribute::UV);
         glVertexAttribPointer((int)ProgramAttribute::UV,
@@ -113,6 +113,12 @@ namespace Graphics
     {
         glBindVertexArray(vao);
         glDrawElements(GL_TRIANGLES, size, GL_UNSIGNED_INT, 0);
+    }
+
+    void StaticMesh::DrawPoints()
+    {
+        glBindVertexArray(vao);
+        glDrawElements(GL_POINTS, size, GL_UNSIGNED_INT, 0);
     }
 
 
@@ -213,8 +219,8 @@ namespace Graphics
         std::vector<Vertex>& vertices,
         std::vector<GLuint>& indices)
     {
-        std::vector<Vector3> tan1(vertices.size());
-        std::vector<Vector3> tan2(vertices.size());
+        std::vector<Vector3> tangents(vertices.size());
+        std::vector<Vector3> bitangents(vertices.size());
 
         //http://www.terathon.com/code/tangent.html
         for (size_t index = 0; index < indices.size(); index += 3)
@@ -231,44 +237,40 @@ namespace Graphics
             Vector2 uv2 = vertices[index2].uv;
             Vector2 uv3 = vertices[index3].uv;
 
-            Vector3 xyz1 = pos2 - pos1;
-            Vector3 xyz2 = pos3 - pos1;
+            Vector3 deltaPos1 = pos2 - pos1;
+            Vector3 deltaPos2 = pos3 - pos1;
 
-            Vector2 st1 = uv2 - uv1;
-            Vector2 st2 = uv3 - uv1;
+            Vector2 deltaUV1 = uv2 - uv1;
+            Vector2 deltaUV2 = uv3 - uv1;
 
-            float r = 1.0f / (st1.x * st2.y - st2.x * st1.y);
-            Vector3 sdir(
-                (st2.y * xyz1.x - st1.y * xyz2.x) * r,
-                (st2.y * xyz1.y - st1.y * xyz2.y) * r,
-                (st2.y * xyz1.z - st1.y * xyz2.z) * r);
-            Vector3 tdir(
-                (st1.x * xyz2.x - st2.x * xyz1.x) * r,
-                (st1.x * xyz2.y - st2.x * xyz1.y) * r,
-                (st1.x * xyz2.z - st2.x * xyz1.z) * r);
+            float r = 1.0f / (deltaUV1.x * deltaUV2.y - deltaUV2.x * deltaUV1.y);
+            Vector3 tangent = (deltaPos1 * deltaUV2.y - deltaPos2 * deltaUV1.y) * r;
+            Vector3 bitangent = (deltaPos2 * deltaUV1.x - deltaPos1 * deltaUV2.x) * r;
 
-            tan1[index1] += sdir;
-            tan1[index2] += sdir;
-            tan1[index3] += sdir;
+            tangents[index1] += tangent;
+            tangents[index2] += tangent;
+            tangents[index3] += tangent;
 
-            tan2[index1] += sdir;
-            tan2[index2] += sdir;
-            tan2[index3] += sdir;
+            bitangents[index1] += bitangent;
+            bitangents[index2] += bitangent;
+            bitangents[index3] += bitangent;
         }
 
         for (size_t i = 0; i < vertices.size(); i++)
         {
             Vector3 normal = vertices[i].normal;
-            Vector3 tangent = tan1[i];
+            Vector3 tangent = tangents[i];
 
             tangent = (tangent - normal * Vector3::Dot(normal, tangent)).Normalized();
+            float handedness = 1;
 
-            if (Vector3::Dot(Vector3::Cross(normal, tangent), tan2[i]) < 0.0f)
+            if (Vector3::Dot(Vector3::Cross(normal, tangent), bitangents[i]) < 0.0f)
             {
-                tangent = -tangent;
+                handedness = -1;
             }
 
             vertices[i].tangent = tangent;
+            vertices[i].tangentHandedness = handedness;
         }
     }
 

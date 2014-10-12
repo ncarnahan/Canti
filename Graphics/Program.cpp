@@ -4,6 +4,21 @@
 
 namespace Graphics
 {
+    std::string GetProgramLinkError(GLuint program)
+    {
+        GLint length;
+        glGetProgramiv(program, GL_INFO_LOG_LENGTH, &length);
+
+        GLchar* buffer = new GLchar[length + 1];
+        glGetProgramInfoLog(program, length, NULL, buffer);
+
+        std::string output(buffer, length + 1);
+
+        delete buffer;
+
+        return output;
+    }
+
     Program::Program()
     {
         program = 0;
@@ -72,6 +87,7 @@ namespace Graphics
         if (!success)
         {
             std::cout << "Program failed to link.\n";
+            std::cout << GetProgramLinkError(program) << std::endl;
             return false;
         }
 
