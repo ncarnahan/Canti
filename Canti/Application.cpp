@@ -53,8 +53,7 @@ void Application::Init()
     _diffuseProgram.LoadFromFiles("Data/Diffuse.vert", "Data/Diffuse.frag");
     _specularProgram.LoadFromFiles("Data/Specular.vert", "Data/Specular.frag");
     _bumpedDiffuseProgram.LoadFromFiles("Data/BumpedDiffuse.vert", "Data/BumpedDiffuse.frag");
-    _bumpedSpecularProgram.LoadFromFiles("Data/Diffuse.vert", "Data/Diffuse.frag");
-    //_bumpedSpecularProgram.LoadFromFiles("Data/BumpedSpecular.vert", "Data/BumpedSpecular.frag");
+    _bumpedSpecularProgram.LoadFromFiles("Data/BumpedSpecular.vert", "Data/BumpedSpecular.frag");
     _tangentProgram.LoadFromFiles("Data/TangentVisualization.vert", "Data/TangentVisualization.geom", "Data/TangentVisualization.frag");
 
     _suzanneMesh.LoadObjFile("Data/Suzanne.obj");
@@ -78,13 +77,13 @@ void Application::Init()
     _suzanneMaterial.SetProgram(_specularProgram);
     _suzanneMaterial.SetTexture(_specularProgram.GetUniformLocation("tex_diffuse"), _suzanneTexture);
 
-    _roomMaterial.SetProgram(_bumpedDiffuseProgram);
-    _roomMaterial.SetTexture(_bumpedDiffuseProgram.GetUniformLocation("tex_diffuse"), _roomTexture);
-    _roomMaterial.SetTexture(_bumpedDiffuseProgram.GetUniformLocation("tex_normal"), _roomNormalTexture);
+    _roomMaterial.SetProgram(_bumpedSpecularProgram);
+    _roomMaterial.SetTexture(_bumpedSpecularProgram.GetUniformLocation("tex_diffuse"), _roomTexture);
+    _roomMaterial.SetTexture(_bumpedSpecularProgram.GetUniformLocation("tex_normal"), _roomNormalTexture);
 
-    _cyllinderMaterial.SetProgram(_bumpedDiffuseProgram);
-    _cyllinderMaterial.SetTexture(_bumpedDiffuseProgram.GetUniformLocation("tex_diffuse"), _roomTexture);
-    _cyllinderMaterial.SetTexture(_bumpedDiffuseProgram.GetUniformLocation("tex_normal"), _cyllinderNormalTexture);
+    _cyllinderMaterial.SetProgram(_bumpedSpecularProgram);
+    _cyllinderMaterial.SetTexture(_bumpedSpecularProgram.GetUniformLocation("tex_diffuse"), _roomTexture);
+    _cyllinderMaterial.SetTexture(_bumpedSpecularProgram.GetUniformLocation("tex_normal"), _cyllinderNormalTexture);
 
     {
         Entity entity;
