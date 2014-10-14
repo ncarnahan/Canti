@@ -22,7 +22,7 @@ namespace Graphics
     }
 
     void Light::Spot(Vector3 position, Vector3 direction, Vector3 color,
-        float intensity, float radius, float angle, float exponent)
+        float intensity, float radius, float angle, float innerPercent)
     {
         this->type = LightType::Spot;
 
@@ -32,6 +32,6 @@ namespace Graphics
         this->intensity = intensity;
         this->radius = radius;
         this->angle = angle;
-        this->exponent = exponent;
+        this->innerPercent = innerPercent;
     }
 }

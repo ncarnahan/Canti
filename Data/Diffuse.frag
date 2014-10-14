@@ -13,6 +13,8 @@ struct Light
     vec3 color;
     float intensity;
     float radius;
+    float cosAngle;
+    float innerPercent;
     int type;
 };
 uniform Light light;
@@ -38,6 +40,22 @@ void main() {
         float NdotL = max(dot(normalDir, lightDir), 0);
         diffuse = light.intensity * light.color * NdotL;
     }
+    else if (light.type == 1) {
+        vec3 lightDir = light.position - position;
+        float lightDistance = length(lightDir);
+        lightDir = lightDir / lightDistance;    //normalize
+
+        //Attenuate to 0 at the radius
+        float dr = lightDistance / light.radius;
+        float denom = max(1 + dr, 0.001);
+        float attenuation = max(1 / (denom * denom), 0);
+        attenuation *= 1 - smoothstep(0, 1, dr);
+
+        //Diffuse component
+        vec3 normalDir = normalize(normal);
+        float NdotL = max(dot(normalDir, lightDir), 0);
+        diffuse = light.intensity * light.color * NdotL * attenuation;
+    }
     else {
         vec3 lightDir = light.position - position;
         float lightDistance = length(lightDir);
@@ -48,6 +66,15 @@ void main() {
         float denom = max(1 + dr, 0.001);
         float attenuation = max(1 / (denom * denom), 0);
         attenuation *= 1 - smoothstep(0, 1, dr);
+
+        float spotEffect = dot(lightDir, -light.direction);
+        if (spotEffect > light.cosAngle) {
+            float zeroToOne = max((spotEffect - light.cosAngle) / (1 - light.cosAngle), 0);
+            attenuation *= smoothstep(0, 1, zeroToOne / max(light.innerPercent, 0.001));
+        }
+        else {
+            attenuation = 0;
+        }
 
         //Diffuse component
         vec3 normalDir = normalize(normal);

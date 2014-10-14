@@ -45,7 +45,7 @@ void main() {
         float NdotH = max(dot(normalDir, halfVec), 0);
         specular = diffuse * pow(NdotH, 32);
     }
-    else {
+    else if (light.type == 1) {
         vec3 lightDir = light.position - position;
         float lightDistance = length(lightDir);
         lightDir = lightDir / lightDistance;    //normalize

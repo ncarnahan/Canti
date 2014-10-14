@@ -77,9 +77,9 @@ void Application::Init()
     _suzanneMaterial.SetProgram(_specularProgram);
     _suzanneMaterial.SetTexture(_specularProgram.GetUniformLocation("tex_diffuse"), _suzanneTexture);
 
-    _roomMaterial.SetProgram(_bumpedSpecularProgram);
-    _roomMaterial.SetTexture(_bumpedSpecularProgram.GetUniformLocation("tex_diffuse"), _roomTexture);
-    _roomMaterial.SetTexture(_bumpedSpecularProgram.GetUniformLocation("tex_normal"), _roomNormalTexture);
+    _roomMaterial.SetProgram(_diffuseProgram);
+    _roomMaterial.SetTexture(_diffuseProgram.GetUniformLocation("tex_diffuse"), _roomTexture);
+    //_roomMaterial.SetTexture(_bumpedSpecularProgram.GetUniformLocation("tex_normal"), _roomNormalTexture);
 
     _cyllinderMaterial.SetProgram(_bumpedSpecularProgram);
     _cyllinderMaterial.SetTexture(_bumpedSpecularProgram.GetUniformLocation("tex_diffuse"), _roomTexture);
@@ -136,6 +136,12 @@ void Application::Init()
         _lights.push_back(light);
     }
 
+    {
+        Light light;
+        light.Spot(Vector3(4, 0, 0), Vector3::back, Vector3(0, 1, 0), 5, 12, 30, 1.0f);
+        _lights.push_back(light);
+    }
+
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
     glCullFace(GL_BACK);
@@ -189,6 +195,8 @@ void Application::Render()
     if (_input.KeyDown(SDL_SCANCODE_L)) { _lights[0].position.x -= 0.05f; }
     _entities[2].position = _lights[0].position;
     
+    _lights[3].direction = Quaternion::AngleAxis((float)SDL_GetTicks() / 50.0f, Vector3::up) * Vector3::forward;
+    _lights[3].innerPercent = (Math::SinDeg((float)SDL_GetTicks() / 11.0f) + 1.0f) / 2.0f;
     
     Vector3 ambient(0.1f, 0.1f, 0.1f);
     Vector3 zero;
@@ -239,6 +247,8 @@ void Application::Render()
             
             glUniform1f(program->GetUniformLocation("light.intensity"), light.intensity);
             glUniform1f(program->GetUniformLocation("light.radius"), light.radius);
+            glUniform1f(program->GetUniformLocation("light.cosAngle"), Math::CosDeg(light.angle));
+            glUniform1f(program->GetUniformLocation("light.innerPercent"), light.innerPercent);
             
 
             //Draw

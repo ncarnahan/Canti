@@ -24,12 +24,12 @@ namespace Graphics
         float intensity;       // DPS
         float radius;          //  PS
         float angle;           //   S
-        float exponent;        //   S
+        float innerPercent;    //   S
 
         void Directional(Vector3 direction, Vector3 color, float intensity);
         void Point(Vector3 position, Vector3 color, float intensity, float radius);
         void Spot(Vector3 position, Vector3 direction, Vector3 color,
-            float intensity, float radius, float angle, float exponent);
+            float intensity, float radius, float angle, float innerPercent);
     };
 }
 

@@ -56,7 +56,7 @@ void main() {
         float NdotL = max(dot(texNormal, lightDirTS), 0);
         diffuse = light.intensity * light.color * NdotL;
     }
-    else {
+    else if (light.type == 1) {
         vec3 lightDirWS = light.position - v2f_position;
         float lightDistance = length(lightDirWS);
         lightDirWS = lightDirWS / lightDistance;    //normalize
