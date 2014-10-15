@@ -19,15 +19,15 @@ struct Light
 };
 uniform Light light;
 
-in vec3 position;
-in vec3 normal;
-in vec2 uv;
+in vec3 v2f_position;
+in vec3 v2f_normal;
+in vec2 v2f_uv;
 
 out vec4 out_color;
 
 void main() {
     //Diffuse from texture
-    vec3 texColor = texture(tex_diffuse, uv.st).rgb;
+    vec3 texColor = texture(tex_diffuse, v2f_uv.st).rgb;
 
 
     //Lighting
@@ -36,12 +36,12 @@ void main() {
 
     if (light.type == 0) {
         vec3 lightDir = normalize(light.direction);
-        vec3 normalDir = normalize(normal);
+        vec3 normalDir = normalize(v2f_normal);
         float NdotL = max(dot(normalDir, lightDir), 0);
         diffuse = light.intensity * light.color * NdotL;
     }
     else if (light.type == 1) {
-        vec3 lightDir = light.position - position;
+        vec3 lightDir = light.position - v2f_position;
         float lightDistance = length(lightDir);
         lightDir = lightDir / lightDistance;    //normalize
 
@@ -52,12 +52,12 @@ void main() {
         attenuation *= 1 - smoothstep(0, 1, dr);
 
         //Diffuse component
-        vec3 normalDir = normalize(normal);
+        vec3 normalDir = normalize(v2f_normal);
         float NdotL = max(dot(normalDir, lightDir), 0);
         diffuse = light.intensity * light.color * NdotL * attenuation;
     }
     else {
-        vec3 lightDir = light.position - position;
+        vec3 lightDir = light.position - v2f_position;
         float lightDistance = length(lightDir);
         lightDir = lightDir / lightDistance;    //normalize
 
@@ -70,14 +70,14 @@ void main() {
         float spotEffect = dot(lightDir, -light.direction);
         if (spotEffect > light.cosAngle) {
             float zeroToOne = max((spotEffect - light.cosAngle) / (1 - light.cosAngle), 0);
-            attenuation *= smoothstep(0, 1, zeroToOne / max(light.innerPercent, 0.001));
+            attenuation *= smoothstep(0, 1, zeroToOne / max(1 - light.innerPercent, 0.001));
         }
         else {
             attenuation = 0;
         }
 
         //Diffuse component
-        vec3 normalDir = normalize(normal);
+        vec3 normalDir = normalize(v2f_normal);
         float NdotL = max(dot(normalDir, lightDir), 0);
         diffuse = light.intensity * light.color * NdotL * attenuation;
     }

@@ -138,7 +138,7 @@ void Application::Init()
 
     {
         Light light;
-        light.Spot(Vector3(4, 0, 0), Vector3::back, Vector3(0, 1, 0), 5, 12, 30, 1.0f);
+        light.Spot(Vector3(4, 0, 0), Vector3::back, Vector3(0, 1, 0), 5, 12, 30, 0.0f);
         _lights.push_back(light);
     }
 
@@ -196,7 +196,7 @@ void Application::Render()
     _entities[2].position = _lights[0].position;
     
     _lights[3].direction = Quaternion::AngleAxis((float)SDL_GetTicks() / 50.0f, Vector3::up) * Vector3::forward;
-    _lights[3].innerPercent = (Math::SinDeg((float)SDL_GetTicks() / 11.0f) + 1.0f) / 2.0f;
+    //_lights[3].innerPercent = (Math::SinDeg((float)SDL_GetTicks() / 11.0f) + 1.0f) / 2.0f;
     
     Vector3 ambient(0.1f, 0.1f, 0.1f);
     Vector3 zero;
