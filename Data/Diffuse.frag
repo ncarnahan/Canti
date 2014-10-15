@@ -31,57 +31,52 @@ void main() {
 
 
     //Lighting
-    vec3 ambient = pow(light.ambient, vec3(2.2));
-    vec3 diffuse = vec3(0);
+    vec3 normalDir = normalize(v2f_normal);
+    vec3 lightDir;
+    float lightDistance;
+    float attenuation = 1;
 
     if (light.type == 0) {
-        vec3 lightDir = normalize(light.direction);
-        vec3 normalDir = normalize(v2f_normal);
-        float NdotL = max(dot(normalDir, lightDir), 0);
-        diffuse = light.intensity * light.color * NdotL;
-    }
-    else if (light.type == 1) {
-        vec3 lightDir = light.position - v2f_position;
-        float lightDistance = length(lightDir);
-        lightDir = lightDir / lightDistance;    //normalize
-
-        //Attenuate to 0 at the radius
-        float dr = lightDistance / light.radius;
-        float denom = max(1 + dr, 0.001);
-        float attenuation = max(1 / (denom * denom), 0);
-        attenuation *= 1 - smoothstep(0, 1, dr);
-
-        //Diffuse component
-        vec3 normalDir = normalize(v2f_normal);
-        float NdotL = max(dot(normalDir, lightDir), 0);
-        diffuse = light.intensity * light.color * NdotL * attenuation;
+        lightDir = normalize(light.direction);
     }
     else {
-        vec3 lightDir = light.position - v2f_position;
-        float lightDistance = length(lightDir);
+        lightDir = light.position - v2f_position;
+        lightDistance = length(lightDir);
         lightDir = lightDir / lightDistance;    //normalize
+    }
 
-        //Attenuate to 0 at the radius
-        float dr = lightDistance / light.radius;
-        float denom = max(1 + dr, 0.001);
-        float attenuation = max(1 / (denom * denom), 0);
-        attenuation *= 1 - smoothstep(0, 1, dr);
+    //Light components
+    vec3 ambient = pow(light.ambient, vec3(2.2));
+    vec3 diffuse = vec3(0);
+    float NdotL = dot(normalDir, lightDir);
 
-        float spotEffect = dot(lightDir, -light.direction);
-        if (spotEffect > light.cosAngle) {
-            float zeroToOne = max((spotEffect - light.cosAngle) / (1 - light.cosAngle), 0);
-            attenuation *= smoothstep(0, 1, zeroToOne / max(1 - light.innerPercent, 0.001));
+    if (NdotL > 0) {
+        //Calculate attenuation
+        if (light.type > 0) {
+            //Attenuate to 0 at the radius
+            float dr = lightDistance / light.radius;
+            float denom = max(1 + dr, 0.001);
+            attenuation = max(1 / (denom * denom), 0);
+            attenuation *= 1 - smoothstep(0, 1, dr);
+
+            if (light.type == 2) {
+                float multiplier = 0;
+                float spotEffect = dot(lightDir, -light.direction);
+
+                if (spotEffect > light.cosAngle) {
+                    float zeroToOne = max((spotEffect - light.cosAngle) / (1 - light.cosAngle), 0);
+                    multiplier = smoothstep(0, 1, zeroToOne / max(1 - light.innerPercent, 0.001));
+                }
+
+                attenuation *= multiplier;
+            }
         }
-        else {
-            attenuation = 0;
-        }
 
-        //Diffuse component
-        vec3 normalDir = normalize(v2f_normal);
-        float NdotL = max(dot(normalDir, lightDir), 0);
+        //Compute diffuse
         diffuse = light.intensity * light.color * NdotL * attenuation;
     }
 
+    //Combine light components
     vec3 lighting = diffuse + ambient;
 
 
