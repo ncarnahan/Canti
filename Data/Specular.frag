@@ -14,60 +14,79 @@ struct Light
     vec3 color;
     float intensity;
     float radius;
+    float cosAngle;
+    float innerPercent;
     int type;
 };
 uniform Light light;
 
-in vec3 position;
-in vec3 normal;
-in vec2 uv;
+in vec3 v2f_position;
+in vec3 v2f_normal;
+in vec2 v2f_uv;
 
 out vec4 out_color;
 
 void main() {
     //Diffuse from texture
-    vec3 texColor = texture(tex_diffuse, uv.st).rgb;
+    vec3 texColor = texture(tex_diffuse, v2f_uv.st).rgb;
 
 
     //Lighting
+    vec3 normalDir = normalize(v2f_normal);
+    vec3 lightDir;
+    float lightDistance;
+    float attenuation = 1;
+
+    if (light.type == 0) {
+        lightDir = normalize(light.direction);
+    }
+    else {
+        lightDir = light.position - v2f_position;
+        lightDistance = length(lightDir);
+        lightDir = lightDir / lightDistance;    //normalize
+    }
+
+    //Light components
     vec3 ambient = pow(light.ambient, vec3(2.2));
     vec3 diffuse = vec3(0);
     vec3 specular = vec3(0);
+    float NdotL = dot(normalDir, lightDir);
 
-    if (light.type == 0) {
-        vec3 lightDir = normalize(light.direction);
-        vec3 normalDir = normalize(normal);
-        float NdotL = max(dot(normalDir, lightDir), 0);
-        diffuse = light.intensity * light.color * NdotL;
+    if (NdotL > 0) {
+        //Calculate attenuation
+        if (light.type > 0) {
+            //Attenuate to 0 at the radius
+            float dr = lightDistance / light.radius;
+            float denom = max(1 + dr, 0.001);
+            attenuation = max(1 / (denom * denom), 0);
+            attenuation *= 1 - smoothstep(0, 1, dr);
 
-        vec3 eyeVec = normalize(in_eyePosition - position);
-        vec3 halfVec = normalize(eyeVec + lightDir);
-        float NdotH = max(dot(normalDir, halfVec), 0);
-        specular = diffuse * pow(NdotH, 32);
-    }
-    else if (light.type == 1) {
-        vec3 lightDir = light.position - position;
-        float lightDistance = length(lightDir);
-        lightDir = lightDir / lightDistance;    //normalize
+            if (light.type == 2) {
+                float multiplier = 0;
+                float spotEffect = dot(lightDir, -light.direction);
 
-        //Attenuate to 0 at the radius
-        float dr = lightDistance / light.radius;
-        float denom = max(1 + dr, 0.001);
-        float attenuation = max(1 / (denom * denom), 0);
-        attenuation *= 1 - smoothstep(0, 1, dr);
+                if (spotEffect > light.cosAngle) {
+                    float zeroToOne = max((spotEffect - light.cosAngle) / (1 - light.cosAngle), 0);
+                    multiplier = smoothstep(0, 1, zeroToOne / max(1 - light.innerPercent, 0.001));
+                }
 
-        //Diffuse component
-        vec3 normalDir = normalize(normal);
-        float NdotL = max(dot(normalDir, lightDir), 0);
+                attenuation *= multiplier;
+            }
+        }
+
+        //Compute diffuse
         diffuse = light.intensity * light.color * NdotL * attenuation;
-        
-        //Specular component
-        vec3 eyeVec = normalize(in_eyePosition - position);
+
+        //Compute specular
+        vec3 eyeVec = normalize(in_eyePosition - v2f_position);
         vec3 halfVec = normalize(eyeVec + lightDir);
         float NdotH = max(dot(normalDir, halfVec), 0);
-        specular = diffuse * pow(NdotH, 32);
+        if (NdotH > 0) {
+            specular = diffuse * pow(NdotH, 32);
+        }
     }
 
+    //Combine light components
     vec3 lighting = diffuse + specular + ambient;
 
 

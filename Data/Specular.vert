@@ -10,15 +10,15 @@ in vec4 in_position;
 in vec3 in_normal;
 in vec2 in_uv;
 
-out vec3 position;
-out vec3 normal;
-out vec2 uv;
+out vec3 v2f_position;
+out vec3 v2f_normal;
+out vec2 v2f_uv;
 
 void main() {
-    position = (in_matrixModel * in_position).xyz;
+    v2f_position = (in_matrixModel * in_position).xyz;
 
     mat3x3 normalMatrix = mat3x3(in_matrixModel);
-    normal = normalize(normalMatrix * in_normal);
-    uv = in_uv;
+    v2f_normal = normalize(normalMatrix * in_normal);
+    v2f_uv = in_uv;
     gl_Position = in_matrixPVM * in_position;
 }
