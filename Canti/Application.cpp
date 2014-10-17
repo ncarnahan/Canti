@@ -77,9 +77,9 @@ void Application::Init()
     _suzanneMaterial.SetProgram(_specularProgram);
     _suzanneMaterial.SetTexture(_specularProgram.GetUniformLocation("tex_diffuse"), _suzanneTexture);
 
-    _roomMaterial.SetProgram(_specularProgram);
-    _roomMaterial.SetTexture(_specularProgram.GetUniformLocation("tex_diffuse"), _roomTexture);
-    //_roomMaterial.SetTexture(_bumpedSpecularProgram.GetUniformLocation("tex_normal"), _roomNormalTexture);
+    _roomMaterial.SetProgram(_bumpedSpecularProgram);
+    _roomMaterial.SetTexture(_bumpedSpecularProgram.GetUniformLocation("tex_diffuse"), _roomTexture);
+    _roomMaterial.SetTexture(_bumpedSpecularProgram.GetUniformLocation("tex_normal"), _roomNormalTexture);
 
     _cyllinderMaterial.SetProgram(_bumpedSpecularProgram);
     _cyllinderMaterial.SetTexture(_bumpedSpecularProgram.GetUniformLocation("tex_diffuse"), _roomTexture);

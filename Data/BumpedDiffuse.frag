@@ -14,6 +14,8 @@ struct Light
     vec3 color;
     float intensity;
     float radius;
+    float cosAngle;
+    float innerPercent;
     int type;
 };
 uniform Light light;
@@ -40,45 +42,58 @@ void main() {
     vec3 bitangent = normalize(v2f_bitangent);
 
     //Lighting
-    vec3 ambient = pow(light.ambient, vec3(2.2));
-    vec3 diffuse = vec3(0);
+    vec3 lightDirWS;
+    float lightDistance;
+    float attenuation = 1;
 
     if (light.type == 0) {
-        vec3 lightDirWS = normalize(light.direction);
-
-        //Convert light direction to tangent space
-        vec3 lightDirTS = vec3(
-            dot(lightDirWS, tangent),
-            dot(lightDirWS, bitangent),
-            dot(lightDirWS, normal)
-        );
-
-        float NdotL = max(dot(texNormal, lightDirTS), 0);
-        diffuse = light.intensity * light.color * NdotL;
+        lightDirWS = normalize(light.direction);
     }
-    else if (light.type == 1) {
-        vec3 lightDirWS = light.position - v2f_position;
-        float lightDistance = length(lightDirWS);
+    else {
+        lightDirWS = light.position - v2f_position;
+        lightDistance = length(lightDirWS);
         lightDirWS = lightDirWS / lightDistance;    //normalize
+    }
 
-        //Convert light direction to tangent space
-        vec3 lightDirTS = vec3(
-            dot(lightDirWS, tangent),
-            dot(lightDirWS, bitangent),
-            dot(lightDirWS, normal)
-        );
+    //Convert light direction to tangent space
+    vec3 lightDirTS = vec3(
+        dot(lightDirWS, tangent),
+        dot(lightDirWS, bitangent),
+        dot(lightDirWS, normal)
+    );
 
-        //Attenuate to 0 at the radius
-        float dr = lightDistance / light.radius;
-        float denom = max(1 + dr, 0.001);
-        float attenuation = max(1 / (denom * denom), 0);
-        attenuation *= 1 - smoothstep(0, 1, dr);
+    //Light components
+    vec3 ambient = pow(light.ambient, vec3(2.2));
+    vec3 diffuse = vec3(0);
+    float NdotL = dot(texNormal, lightDirTS);
 
-        //Diffuse component
-        float NdotL = max(dot(texNormal, lightDirTS), 0);
+    if (NdotL > 0) {
+        //Calculate attenuation
+        if (light.type > 0) {
+            //Attenuate to 0 at the radius
+            float dr = lightDistance / light.radius;
+            float denom = max(1 + dr, 0.001);
+            attenuation = max(1 / (denom * denom), 0);
+            attenuation *= 1 - smoothstep(0, 1, dr);
+
+            if (light.type == 2) {
+                float multiplier = 0;
+                float spotEffect = dot(lightDirWS, -light.direction);
+
+                if (spotEffect > light.cosAngle) {
+                    float zeroToOne = max((spotEffect - light.cosAngle) / (1 - light.cosAngle), 0);
+                    multiplier = smoothstep(0, 1, zeroToOne / max(1 - light.innerPercent, 0.001));
+                }
+
+                attenuation *= multiplier;
+            }
+        }
+
+        //Compute diffuse
         diffuse = light.intensity * light.color * NdotL * attenuation;
     }
 
+    //Combine light components
     vec3 lighting = diffuse + ambient;
 
 
