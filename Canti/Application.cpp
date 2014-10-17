@@ -74,16 +74,20 @@ void Application::Init()
     _cyllinderNormalTexture.Load("Data/NormalMapTest.png", normalSettings);
     _roomNormalTexture.Load("Data/TilesNormal.png", normalSettings);
 
-    _suzanneMaterial.SetProgram(_specularProgram);
-    _suzanneMaterial.SetTexture(_specularProgram.GetUniformLocation("tex_diffuse"), _suzanneTexture);
+    _suzanneMaterial.SetProgram(_diffuseProgram);
+    _suzanneMaterial.SetTexture("tex_diffuse", _suzanneTexture);
 
     _roomMaterial.SetProgram(_bumpedSpecularProgram);
-    _roomMaterial.SetTexture(_bumpedSpecularProgram.GetUniformLocation("tex_diffuse"), _roomTexture);
-    _roomMaterial.SetTexture(_bumpedSpecularProgram.GetUniformLocation("tex_normal"), _roomNormalTexture);
+    _roomMaterial.SetTexture("tex_diffuse", _roomTexture);
+    _roomMaterial.SetTexture("tex_normal", _roomNormalTexture);
+    _roomMaterial.SetVector3("material.specularColor", Vector3(1, 0, 0));
+    _roomMaterial.SetFloat("material.specularExponent", 100);
 
     _cyllinderMaterial.SetProgram(_bumpedSpecularProgram);
-    _cyllinderMaterial.SetTexture(_bumpedSpecularProgram.GetUniformLocation("tex_diffuse"), _roomTexture);
-    _cyllinderMaterial.SetTexture(_bumpedSpecularProgram.GetUniformLocation("tex_normal"), _cyllinderNormalTexture);
+    _cyllinderMaterial.SetTexture("tex_diffuse", _roomTexture);
+    _cyllinderMaterial.SetTexture("tex_normal", _cyllinderNormalTexture);
+    _cyllinderMaterial.SetVector3("material.specularColor", Vector3(0, 0, 1));
+    _cyllinderMaterial.SetFloat("material.specularExponent", 64);
 
     {
         Entity entity;
@@ -132,7 +136,7 @@ void Application::Init()
 
     {
         Light light;
-        light.Point(Vector3(0, 0, -6), Vector3(0, 0, 1), 8.0f, 8.0f);
+        light.Point(Vector3(0, 0, -6), Vector3(1, 1, 1), 2.0f, 8.0f);
         _lights.push_back(light);
     }
 

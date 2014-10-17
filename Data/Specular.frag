@@ -20,6 +20,13 @@ struct Light
 };
 uniform Light light;
 
+struct Material
+{
+    vec3 specularColor;
+    float specularExponent;
+};
+uniform Material material;
+
 in vec3 v2f_position;
 in vec3 v2f_normal;
 in vec2 v2f_uv;
@@ -82,7 +89,7 @@ void main() {
         vec3 halfVec = normalize(eyeVec + lightDir);
         float NdotH = max(dot(normalDir, halfVec), 0);
         if (NdotH > 0) {
-            specular = diffuse * pow(NdotH, 32);
+            specular = material.specularColor * diffuse * pow(NdotH, material.specularExponent);
         }
     }
 
