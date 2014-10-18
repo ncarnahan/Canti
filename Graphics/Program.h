@@ -19,7 +19,7 @@ namespace Graphics
     class Program
     {
     private:
-        GLuint program;
+        GLuint _program;
 
     public:
         Program();
@@ -33,7 +33,7 @@ namespace Graphics
         void Start();
         void Stop();
 
-        inline GLint GetUniformLocation(const char* name) { return glGetUniformLocation(program, name); }
+        inline GLint GetUniformLocation(const char* name) { return glGetUniformLocation(_program, name); }
 
     private:
         bool Load(const Shader* vertShader, const Shader* geomShader, const Shader* fragShader);

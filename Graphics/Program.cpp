@@ -21,14 +21,14 @@ namespace Graphics
 
     Program::Program()
     {
-        program = 0;
+        _program = 0;
     }
 
     Program::~Program()
     {
-        if (program != 0)
+        if (_program != 0)
         {
-            glDeleteProgram(program);
+            glDeleteProgram(_program);
         }
     }
 
@@ -66,28 +66,28 @@ namespace Graphics
     bool Program::Load(const Shader* vertShader, const Shader* geomShader, const Shader* fragShader)
     {
         //Create
-        program = glCreateProgram();
+        _program = glCreateProgram();
 
         //Attach shaders to program
-        if (vertShader != nullptr) { glAttachShader(program, vertShader->GetShader()); }
-        if (geomShader != nullptr) { glAttachShader(program, geomShader->GetShader()); }
-        if (fragShader != nullptr) { glAttachShader(program, fragShader->GetShader()); }
+        if (vertShader != nullptr) { glAttachShader(_program, vertShader->GetShader()); }
+        if (geomShader != nullptr) { glAttachShader(_program, geomShader->GetShader()); }
+        if (fragShader != nullptr) { glAttachShader(_program, fragShader->GetShader()); }
 
         //Bind the attributes to a standard location
-        glBindAttribLocation(program, (GLuint)ProgramAttribute::Position, "in_position");
-        glBindAttribLocation(program, (GLuint)ProgramAttribute::Normal, "in_normal");
-        glBindAttribLocation(program, (GLuint)ProgramAttribute::Tangent, "in_tangent");
-        glBindAttribLocation(program, (GLuint)ProgramAttribute::UV, "in_uv");
+        glBindAttribLocation(_program, (GLuint)ProgramAttribute::Position, "in_position");
+        glBindAttribLocation(_program, (GLuint)ProgramAttribute::Normal, "in_normal");
+        glBindAttribLocation(_program, (GLuint)ProgramAttribute::Tangent, "in_tangent");
+        glBindAttribLocation(_program, (GLuint)ProgramAttribute::UV, "in_uv");
 
         //Link the program
-        glLinkProgram(program);
+        glLinkProgram(_program);
 
         int success;
-        glGetProgramiv(program, GL_LINK_STATUS, &success);
+        glGetProgramiv(_program, GL_LINK_STATUS, &success);
         if (!success)
         {
             std::cout << "Program failed to link.\n";
-            std::cout << GetProgramLinkError(program) << std::endl;
+            std::cout << GetProgramLinkError(_program) << std::endl;
             return false;
         }
 
@@ -96,7 +96,7 @@ namespace Graphics
 
     void Program::Start()
     {
-        glUseProgram(program);
+        glUseProgram(_program);
     }
 
     void Program::Stop()
