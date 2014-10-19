@@ -12,6 +12,7 @@ namespace Graphics
     enum class BlendType
     {
         Opaque,
+        AlphaTested,
         Transparent,
         Additive,
     };

@@ -27,6 +27,7 @@ private:
     Program _specularProgram;
     Program _bumpedDiffuseProgram;
     Program _bumpedSpecularProgram;
+    Program _cutoutProgram;
     Program _tangentProgram;
     bool _showTangents;
 
@@ -47,6 +48,7 @@ private:
 
     Texture _blendedTexture;
     Material _blendedMaterial;
+    Material _cutoutMaterial;
 
     std::vector<Entity> _entities;
     std::vector<Light> _lights;

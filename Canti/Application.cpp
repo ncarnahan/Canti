@@ -54,6 +54,7 @@ void Application::Init()
     _specularProgram.LoadFromFiles("Data/Specular.vert", "Data/Specular.frag");
     _bumpedDiffuseProgram.LoadFromFiles("Data/BumpedDiffuse.vert", "Data/BumpedDiffuse.frag");
     _bumpedSpecularProgram.LoadFromFiles("Data/BumpedSpecular.vert", "Data/BumpedSpecular.frag");
+    _cutoutProgram.LoadFromFiles("Data/CutoutDiffuse.vert", "Data/CutoutDiffuse.frag");
     _tangentProgram.LoadFromFiles("Data/TangentVisualization.vert", "Data/TangentVisualization.geom", "Data/TangentVisualization.frag");
 
     _cubeMesh.LoadObjFile("Data/Cube.obj");
@@ -95,6 +96,11 @@ void Application::Init()
     _blendedMaterial.SetBlendType(BlendType::Transparent);
     _blendedMaterial.SetTexture("tex_diffuse", _blendedTexture);
 
+    _cutoutMaterial.SetProgram(_cutoutProgram);
+    _cutoutMaterial.SetBlendType(BlendType::AlphaTested);
+    _cutoutMaterial.SetTexture("tex_diffuse", _blendedTexture);
+    _cutoutMaterial.SetFloat("material.cutoff", 0.5f);
+
     {
         Entity entity;
         entity.mesh = &_roomMesh;
@@ -125,6 +131,14 @@ void Application::Init()
         entity.mesh = &_cyllinderMesh;
         entity.material = &_cyllinderMaterial;
         entity.position = Vector3(0, -1, 2);
+        _entities.push_back(entity);
+    }
+
+    {
+        Entity entity;
+        entity.mesh = &_cubeMesh;
+        entity.material = &_cutoutMaterial;
+        entity.position = Vector3(-2, 0, 0);
         _entities.push_back(entity);
     }
 

@@ -41,16 +41,16 @@ namespace Graphics
         glDepthFunc(GL_LESS);
 
         //Set up blending
-        if (_blendType == BlendType::Opaque)
+        if (_blendType == BlendType::Opaque || _blendType == BlendType::AlphaTested)
         {
             glDisable(GL_BLEND);
         }
         else
         {
+            glDepthMask(GL_FALSE);
             glEnable(GL_BLEND);
             if (_blendType == BlendType::Additive)
             {
-                glDepthMask(GL_FALSE);
                 glBlendFunc(GL_SRC_ALPHA, GL_ONE);
             }
             else
@@ -66,7 +66,7 @@ namespace Graphics
         glDepthFunc(GL_LEQUAL);
         glEnable(GL_BLEND);
 
-        if (_blendType == BlendType::Opaque)
+        if (_blendType == BlendType::Opaque || _blendType == BlendType::AlphaTested)
         {
             glBlendFunc(GL_ONE, GL_ONE);
         }
