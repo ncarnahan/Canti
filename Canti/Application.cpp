@@ -55,6 +55,7 @@ void Application::Init()
     _bumpedDiffuseProgram.LoadFromFiles("Data/BumpedDiffuse.vert", "Data/BumpedDiffuse.frag");
     _bumpedSpecularProgram.LoadFromFiles("Data/BumpedSpecular.vert", "Data/BumpedSpecular.frag");
     _cutoutProgram.LoadFromFiles("Data/CutoutDiffuse.vert", "Data/CutoutDiffuse.frag");
+    _additiveProgram.LoadFromFiles("Data/Additive.vert", "Data/Additive.frag");
     _tangentProgram.LoadFromFiles("Data/TangentVisualization.vert", "Data/TangentVisualization.geom", "Data/TangentVisualization.frag");
 
     _cubeMesh.LoadObjFile("Data/Cube.obj");
@@ -69,6 +70,7 @@ void Application::Init()
     _suzanneTexture.Load("Data/Texture.png", diffuseSettings);
     _roomTexture.Load("Data/Tiles.png", diffuseSettings);
     _blendedTexture.Load("Data/Blended.png", diffuseSettings);
+    _particleTexture.Load("Data/Particle.png", diffuseSettings);
 
     TextureLoadSettings normalSettings;
     normalSettings.useSrgbColorSpace = false;
@@ -100,6 +102,10 @@ void Application::Init()
     _cutoutMaterial.SetBlendType(BlendType::AlphaTested);
     _cutoutMaterial.SetTexture("tex_diffuse", _blendedTexture);
     _cutoutMaterial.SetFloat("material.cutoff", 0.5f);
+
+    _particleMaterial.SetProgram(_additiveProgram);
+    _particleMaterial.SetBlendType(BlendType::Additive);
+    _particleMaterial.SetTexture("tex_diffuse", _particleTexture);
 
     {
         Entity entity;
@@ -147,6 +153,14 @@ void Application::Init()
         entity.mesh = &_cubeMesh;
         entity.material = &_blendedMaterial;
         entity.position = Vector3(2, 0, 0);
+        _entities.push_back(entity);
+    }
+
+    {
+        Entity entity;
+        entity.mesh = &_cubeMesh;
+        entity.material = &_particleMaterial;
+        entity.position = Vector3(0, 0, 4);
         _entities.push_back(entity);
     }
 

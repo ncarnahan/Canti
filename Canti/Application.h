@@ -28,6 +28,7 @@ private:
     Program _bumpedDiffuseProgram;
     Program _bumpedSpecularProgram;
     Program _cutoutProgram;
+    Program _additiveProgram;
     Program _tangentProgram;
     bool _showTangents;
 
@@ -49,6 +50,9 @@ private:
     Texture _blendedTexture;
     Material _blendedMaterial;
     Material _cutoutMaterial;
+
+    Texture _particleTexture;
+    Material _particleMaterial;
 
     std::vector<Entity> _entities;
     std::vector<Light> _lights;
