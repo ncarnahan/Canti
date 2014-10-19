@@ -56,6 +56,7 @@ void Application::Init()
     _bumpedSpecularProgram.LoadFromFiles("Data/BumpedSpecular.vert", "Data/BumpedSpecular.frag");
     _tangentProgram.LoadFromFiles("Data/TangentVisualization.vert", "Data/TangentVisualization.geom", "Data/TangentVisualization.frag");
 
+    _cubeMesh.LoadObjFile("Data/Cube.obj");
     _suzanneMesh.LoadObjFile("Data/Suzanne.obj");
     _roomMesh.LoadObjFile("Data/Room.obj");
     _cyllinderMesh.LoadObjFile("Data/NormalMapTest.obj");
@@ -66,6 +67,7 @@ void Application::Init()
     diffuseSettings.filter = Graphics::TextureFilter::Trilinear;
     _suzanneTexture.Load("Data/Texture.png", diffuseSettings);
     _roomTexture.Load("Data/Tiles.png", diffuseSettings);
+    _blendedTexture.Load("Data/Blended.png", diffuseSettings);
 
     TextureLoadSettings normalSettings;
     normalSettings.useSrgbColorSpace = false;
@@ -88,6 +90,10 @@ void Application::Init()
     _cyllinderMaterial.SetTexture("tex_normal", _cyllinderNormalTexture);
     _cyllinderMaterial.SetVector3("material.specularColor", Vector3(0, 0, 1));
     _cyllinderMaterial.SetFloat("material.specularExponent", 64);
+
+    _blendedMaterial.SetProgram(_diffuseProgram);
+    _blendedMaterial.SetBlendType(BlendType::Transparent);
+    _blendedMaterial.SetTexture("tex_diffuse", _blendedTexture);
 
     {
         Entity entity;
@@ -123,16 +129,24 @@ void Application::Init()
     }
 
     {
-        Light light;
-        light.Point(Vector3::zero, Vector3(1, 0, 0), 1.0f, 5.0f);
-        _lights.push_back(light);
+        Entity entity;
+        entity.mesh = &_cubeMesh;
+        entity.material = &_blendedMaterial;
+        entity.position = Vector3(2, 0, 0);
+        _entities.push_back(entity);
     }
 
     {
         Light light;
-        light.Directional(Vector3(0.5f, 1, 1.5f), Vector3::one, 0.02f);
+        light.Point(Vector3::zero, Vector3(0.9f, 0.9f, 1.0f), 1.0f, 5.0f);
         _lights.push_back(light);
     }
+
+    /*{
+        Light light;
+        light.Directional(Vector3(0.5f, 1, 1.5f), Vector3::one, 0.02f);
+        _lights.push_back(light);
+    }*/
 
     {
         Light light;
@@ -140,11 +154,11 @@ void Application::Init()
         _lights.push_back(light);
     }
 
-    {
+    /*{
         Light light;
         light.Spot(Vector3(4, 0, 0), Vector3::back, Vector3(0, 1, 0), 5, 12, 30, 0.0f);
         _lights.push_back(light);
-    }
+    }*/
 
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
@@ -180,6 +194,7 @@ void Application::Simulate()
 
 void Application::Render()
 {
+    glDepthMask(GL_TRUE);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     auto projection = Matrix4x4::Perspective(65, 16.0f / 9.0f, 0.01f, 1000);
@@ -199,7 +214,7 @@ void Application::Render()
     if (_input.KeyDown(SDL_SCANCODE_L)) { _lights[0].position.x -= 0.05f; }
     _entities[2].position = _lights[0].position;
     
-    _lights[3].direction = Quaternion::AngleAxis((float)SDL_GetTicks() / 50.0f, Vector3::up) * Vector3::forward;
+    //_lights[3].direction = Quaternion::AngleAxis((float)SDL_GetTicks() / 50.0f, Vector3::up) * Vector3::forward;
     //_lights[3].innerPercent = (Math::SinDeg((float)SDL_GetTicks() / 11.0f) + 1.0f) / 2.0f;
     
     Vector3 ambient(0.1f, 0.1f, 0.1f);
@@ -230,12 +245,6 @@ void Application::Render()
         glUniformMatrix4fv(program->GetUniformLocation("in_matrixModel"), 1, false, &modelMatrix[0]);
         glUniformMatrix4fv(program->GetUniformLocation("in_matrixPVM"), 1, false, &pvm[0]);
 
-
-        //Disable blending; we're drawing the first one
-        glDisable(GL_BLEND);
-        glBlendFunc(GL_ONE, GL_ONE);
-        glDepthFunc(GL_LESS);
-
         
         //Ambient lighting on first pass
         glUniform3fv(program->GetUniformLocation("light.ambient"), 1, &ambient[0]);
@@ -259,9 +268,7 @@ void Application::Render()
             entity.mesh->Draw();
 
 
-            //Additive lighting; enable blending and allow equal depth
-            glEnable(GL_BLEND);
-            glDepthFunc(GL_LEQUAL);
+            entity.material->SecondPass();
 
             //Disable ambient for future passes
             glUniform3fv(program->GetUniformLocation("light.ambient"), 1, &zero[0]);

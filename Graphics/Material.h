@@ -9,6 +9,13 @@ using namespace Math;
 
 namespace Graphics
 {
+    enum class BlendType
+    {
+        Opaque,
+        Transparent,
+        Additive,
+    };
+
     class Material
     {
     private:
@@ -17,6 +24,7 @@ namespace Graphics
         struct PropVector3 { GLint uniform; Vector3 value; };
 
         Program* _program;
+        BlendType _blendType;
 
         //The first item of the pair is the shader uniform location
         std::vector<PropTexture> _textures;
@@ -27,8 +35,11 @@ namespace Graphics
         Material();
 
         void Start();
+        void FirstPass();
+        void SecondPass();
 
         void SetProgram(Program& program);
+        void SetBlendType(BlendType blendType) { _blendType = blendType; }
         void SetTexture(GLint location, Texture& texture);
         void SetFloat(GLint location, float value);
         void SetVector3(GLint location, Vector3 value);

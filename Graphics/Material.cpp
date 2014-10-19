@@ -5,11 +5,14 @@ namespace Graphics
 {
     Material::Material()
     {
+        _blendType = BlendType::Opaque;
     }
 
     void Material::Start()
     {
         _program->Start();
+
+        FirstPass();
 
         //Bind textures
         for (size_t i = 0; i < _textures.size(); i++)
@@ -29,6 +32,54 @@ namespace Graphics
         for (auto& thing : _vector3Storage)
         {
             glUniform3fv(thing.uniform, 1, &thing.value[0]);
+        }
+    }
+
+    void Material::FirstPass()
+    {
+        glDepthMask(GL_TRUE);
+        glDepthFunc(GL_LESS);
+
+        //Set up blending
+        if (_blendType == BlendType::Opaque)
+        {
+            glDisable(GL_BLEND);
+        }
+        else
+        {
+            glEnable(GL_BLEND);
+            if (_blendType == BlendType::Additive)
+            {
+                glDepthMask(GL_FALSE);
+                glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+            }
+            else
+            {
+                glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+            }
+        }
+    }
+
+    void Material::SecondPass()
+    {
+        glDepthMask(GL_FALSE);
+        glDepthFunc(GL_LEQUAL);
+        glEnable(GL_BLEND);
+
+        if (_blendType == BlendType::Opaque)
+        {
+            glBlendFunc(GL_ONE, GL_ONE);
+        }
+        else
+        {
+            if (_blendType == BlendType::Additive)
+            {
+                glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+            }
+            else
+            {
+                glBlendFunc(GL_SRC_ALPHA, GL_DST_ALPHA);
+            }
         }
     }
 

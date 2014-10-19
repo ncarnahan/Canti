@@ -30,6 +30,8 @@ private:
     Program _tangentProgram;
     bool _showTangents;
 
+    StaticMesh _cubeMesh;
+
     StaticMesh _suzanneMesh;
     Texture _suzanneTexture;
     Material _suzanneMaterial;
@@ -42,6 +44,9 @@ private:
     StaticMesh _cyllinderMesh;
     Texture _cyllinderNormalTexture;
     Material _cyllinderMaterial;
+
+    Texture _blendedTexture;
+    Material _blendedMaterial;
 
     std::vector<Entity> _entities;
     std::vector<Light> _lights;

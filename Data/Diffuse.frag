@@ -28,6 +28,7 @@ out vec4 out_color;
 void main() {
     //Diffuse from texture
     vec3 texColor = texture(tex_diffuse, v2f_uv.st).rgb;
+    float texAlpha = texture(tex_diffuse, v2f_uv.st).a;
 
 
     //Lighting
@@ -84,5 +85,5 @@ void main() {
     vec3 gamma = vec3(1.0 / 2.2);
     vec3 final = pow(texColor * lighting, gamma);
 
-    out_color = vec4(final, 1);
+    out_color = vec4(final, texAlpha);
 }
