@@ -26,6 +26,7 @@ namespace Graphics
 
         Program* _program;
         BlendType _blendType;
+        bool _useLighting;
 
         //The first item of the pair is the shader uniform location
         std::vector<PropTexture> _textures;
@@ -41,6 +42,7 @@ namespace Graphics
 
         void SetProgram(Program& program);
         void SetBlendType(BlendType blendType) { _blendType = blendType; }
+        void SetLighting(bool useLighting) { _useLighting = useLighting; }
         void SetTexture(GLint location, Texture& texture);
         void SetFloat(GLint location, float value);
         void SetVector3(GLint location, Vector3 value);
@@ -61,6 +63,7 @@ namespace Graphics
         }
 
         inline Program* GetProgram() { return _program; }
+        inline bool IsLit() { return _useLighting; }
     };
 }
 

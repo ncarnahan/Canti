@@ -3,9 +3,11 @@
 
 namespace Graphics
 {
-    Material::Material()
+    Material::Material() :
+        _blendType(BlendType::Opaque),
+        _useLighting(true)
     {
-        _blendType = BlendType::Opaque;
+
     }
 
     void Material::Start()

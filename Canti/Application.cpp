@@ -263,30 +263,39 @@ void Application::Render()
         //Ambient lighting on first pass
         glUniform3fv(program->GetUniformLocation("light.ambient"), 1, &ambient[0]);
 
-        for (auto& light : _lights)
+        if (entity.material->IsLit())
         {
-            //Light uniforms
-            glUniform1i(program->GetUniformLocation("light.type"), (int)light.type);
+            for (auto& light : _lights)
+            {
+                //Light uniforms
+                glUniform1i(program->GetUniformLocation("light.type"), (int)light.type);
 
-            glUniform3fv(program->GetUniformLocation("light.position"), 1, &light.position[0]);
-            glUniform3fv(program->GetUniformLocation("light.direction"), 1, &light.direction[0]);
-            glUniform3fv(program->GetUniformLocation("light.color"), 1, &light.color[0]);
+                glUniform3fv(program->GetUniformLocation("light.position"), 1, &light.position[0]);
+                glUniform3fv(program->GetUniformLocation("light.direction"), 1, &light.direction[0]);
+                glUniform3fv(program->GetUniformLocation("light.color"), 1, &light.color[0]);
             
-            glUniform1f(program->GetUniformLocation("light.intensity"), light.intensity);
-            glUniform1f(program->GetUniformLocation("light.radius"), light.radius);
-            glUniform1f(program->GetUniformLocation("light.cosAngle"), Math::CosDeg(light.angle));
-            glUniform1f(program->GetUniformLocation("light.innerPercent"), light.innerPercent);
+                glUniform1f(program->GetUniformLocation("light.intensity"), light.intensity);
+                glUniform1f(program->GetUniformLocation("light.radius"), light.radius);
+                glUniform1f(program->GetUniformLocation("light.cosAngle"), Math::CosDeg(light.angle));
+                glUniform1f(program->GetUniformLocation("light.innerPercent"), light.innerPercent);
             
 
+                //Draw
+                entity.mesh->Draw();
+
+
+                entity.material->SecondPass();
+
+                //Disable ambient for future passes
+                glUniform3fv(program->GetUniformLocation("light.ambient"), 1, &zero[0]);
+            }
+        }
+        else
+        {
             //Draw
             entity.mesh->Draw();
-
-
-            entity.material->SecondPass();
-
-            //Disable ambient for future passes
-            glUniform3fv(program->GetUniformLocation("light.ambient"), 1, &zero[0]);
         }
+        
 
         //Tangent Visualization
         if (_showTangents)
