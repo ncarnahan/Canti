@@ -57,18 +57,17 @@ void Application::Init()
     _cutoutProgram.LoadFromFiles("Data/CutoutDiffuse.vert", "Data/CutoutDiffuse.frag");
     _additiveProgram.LoadFromFiles("Data/Additive.vert", "Data/Additive.frag");
     _tangentProgram.LoadFromFiles("Data/TangentVisualization.vert", "Data/TangentVisualization.geom", "Data/TangentVisualization.frag");
-
+    
+    _roomMesh.LoadObjFile("Data/Room.obj");
     _cubeMesh.LoadObjFile("Data/Cube.obj");
     _suzanneMesh.LoadObjFile("Data/Suzanne.obj");
-    _roomMesh.LoadObjFile("Data/Room.obj");
-    _cyllinderMesh.LoadObjFile("Data/NormalMapTest.obj");
 
     TextureLoadSettings diffuseSettings;
     diffuseSettings.useSrgbColorSpace = true;
     diffuseSettings.generateMipmaps = true;
     diffuseSettings.filter = Graphics::TextureFilter::Trilinear;
     _suzanneTexture.Load("Data/Texture.png", diffuseSettings);
-    _roomTexture.Load("Data/Tiles.png", diffuseSettings);
+    _tileTexture.Load("Data/Tiles.png", diffuseSettings);
     _blendedTexture.Load("Data/Blended.png", diffuseSettings);
     _particleTexture.Load("Data/Particle.png", diffuseSettings);
 
@@ -76,23 +75,28 @@ void Application::Init()
     normalSettings.useSrgbColorSpace = false;
     normalSettings.generateMipmaps = true;
     normalSettings.filter = Graphics::TextureFilter::Trilinear;
-    _cyllinderNormalTexture.Load("Data/NormalMapTest.png", normalSettings);
-    _roomNormalTexture.Load("Data/TilesNormal.png", normalSettings);
+    _tileNormalTexture.Load("Data/TilesNormal.png", normalSettings);
 
     _suzanneMaterial.SetProgram(_diffuseProgram);
     _suzanneMaterial.SetTexture("tex_diffuse", _suzanneTexture);
 
-    _roomMaterial.SetProgram(_bumpedSpecularProgram);
-    _roomMaterial.SetTexture("tex_diffuse", _roomTexture);
-    _roomMaterial.SetTexture("tex_normal", _roomNormalTexture);
-    _roomMaterial.SetVector3("material.specularColor", Vector3(1, 0, 0));
-    _roomMaterial.SetFloat("material.specularExponent", 100);
+    _tileMaterial1.SetProgram(_diffuseProgram);
+    _tileMaterial1.SetTexture("tex_diffuse", _tileTexture);
 
-    _cyllinderMaterial.SetProgram(_bumpedSpecularProgram);
-    _cyllinderMaterial.SetTexture("tex_diffuse", _roomTexture);
-    _cyllinderMaterial.SetTexture("tex_normal", _cyllinderNormalTexture);
-    _cyllinderMaterial.SetVector3("material.specularColor", Vector3(0, 0, 1));
-    _cyllinderMaterial.SetFloat("material.specularExponent", 64);
+    _tileMaterial2.SetProgram(_specularProgram);
+    _tileMaterial2.SetTexture("tex_diffuse", _tileTexture);
+    _tileMaterial2.SetVector3("material.specularColor", Vector3(1, 0, 0));
+    _tileMaterial2.SetFloat("material.specularExponent", 100);
+
+    _tileMaterial3.SetProgram(_bumpedDiffuseProgram);
+    _tileMaterial3.SetTexture("tex_diffuse", _tileTexture);
+    _tileMaterial3.SetTexture("tex_normal", _tileNormalTexture);
+
+    _tileMaterial4.SetProgram(_bumpedSpecularProgram);
+    _tileMaterial4.SetTexture("tex_diffuse", _tileTexture);
+    _tileMaterial4.SetTexture("tex_normal", _tileNormalTexture);
+    _tileMaterial4.SetVector3("material.specularColor", Vector3(1, 0, 0));
+    _tileMaterial4.SetFloat("material.specularExponent", 100);
 
     _blendedMaterial.SetProgram(_diffuseProgram);
     _blendedMaterial.SetBlendType(BlendType::Transparent);
@@ -107,44 +111,66 @@ void Application::Init()
     _particleMaterial.SetBlendType(BlendType::Additive);
     _particleMaterial.SetTexture("tex_diffuse", _particleTexture);
 
+    
     {
         Entity entity;
         entity.mesh = &_roomMesh;
-        entity.material = &_roomMaterial;
-        entity.position = Vector3(0, -2, 0);
+        entity.material = &_tileMaterial4;
+        entity.position = Vector3(0, -2, -8);
+        entity.scale = 2;
         _entities.push_back(entity);
     }
 
+    //Suzanne
     {
         Entity entity;
         entity.mesh = &_suzanneMesh;
         entity.material = &_suzanneMaterial;
-        entity.position = Vector3(0, 0, -4);
+        entity.position = Vector3(0, 0, -14);
+        entity.scale = 2;
         _entities.push_back(entity);
     }
 
+    //Four solid cubes
     {
         Entity entity;
-        entity.mesh = &_suzanneMesh;
-        entity.material = &_suzanneMaterial;
-        entity.position = Vector3(6, 0, 0);
-        entity.scale = 0.05f;
-        _entities.push_back(entity);
-    }
-
-    {
-        Entity entity;
-        entity.mesh = &_cyllinderMesh;
-        entity.material = &_cyllinderMaterial;
-        entity.position = Vector3(0, -1, 2);
+        entity.mesh = &_cubeMesh;
+        entity.material = &_tileMaterial1;
+        entity.position = Vector3(-6, 0, -2);
         _entities.push_back(entity);
     }
 
     {
         Entity entity;
         entity.mesh = &_cubeMesh;
-        entity.material = &_cutoutMaterial;
-        entity.position = Vector3(-2, 0, 0);
+        entity.material = &_tileMaterial2;
+        entity.position = Vector3(-2, 0, -2);
+        _entities.push_back(entity);
+    }
+
+    {
+        Entity entity;
+        entity.mesh = &_cubeMesh;
+        entity.material = &_tileMaterial3;
+        entity.position = Vector3(2, 0, -2);
+        _entities.push_back(entity);
+    }
+
+    {
+        Entity entity;
+        entity.mesh = &_cubeMesh;
+        entity.material = &_tileMaterial4;
+        entity.position = Vector3(6, 0, -2);
+        _entities.push_back(entity);
+    }
+
+
+    //Four blended cubes
+    {
+        Entity entity;
+        entity.mesh = &_cubeMesh;
+        entity.material = &_blendedMaterial;
+        entity.position = Vector3(-6, 0, -10);
         _entities.push_back(entity);
     }
 
@@ -152,7 +178,49 @@ void Application::Init()
         Entity entity;
         entity.mesh = &_cubeMesh;
         entity.material = &_blendedMaterial;
-        entity.position = Vector3(2, 0, 0);
+        entity.position = Vector3(-2, 0, -10);
+        _entities.push_back(entity);
+    }
+
+    {
+        Entity entity;
+        entity.mesh = &_cubeMesh;
+        entity.material = &_blendedMaterial;
+        entity.position = Vector3(2, 0, -10);
+        _entities.push_back(entity);
+    }
+
+    {
+        Entity entity;
+        entity.mesh = &_cubeMesh;
+        entity.material = &_blendedMaterial;
+        entity.position = Vector3(6, 0, -10);
+        _entities.push_back(entity);
+    }
+
+
+    //Four different transparency cubes
+    {
+        Entity entity;
+        entity.mesh = &_cubeMesh;
+        entity.material = &_tileMaterial1;
+        entity.position = Vector3(-6, 0, -6);
+        _entities.push_back(entity);
+    }
+
+    {
+        Entity entity;
+        entity.mesh = &_cubeMesh;
+        entity.material = &_cutoutMaterial;
+        entity.position = Vector3(-2, 0, -6);
+        _entities.push_back(entity);
+    }
+
+    {
+        Entity entity;
+        entity.mesh = &_cubeMesh;
+        entity.material = &_blendedMaterial;
+        entity.position = Vector3(2, 0, -6);
         _entities.push_back(entity);
     }
 
@@ -160,39 +228,34 @@ void Application::Init()
         Entity entity;
         entity.mesh = &_cubeMesh;
         entity.material = &_particleMaterial;
-        entity.position = Vector3(0, 0, 4);
+        entity.position = Vector3(6, 0, -6);
         _entities.push_back(entity);
     }
 
-    {
-        Light light;
-        light.Point(Vector3::zero, Vector3(0.9f, 0.9f, 1.0f), 1.0f, 5.0f);
-        _lights.push_back(light);
-    }
 
-    /*{
+    {
         Light light;
         light.Directional(Vector3(0.5f, 1, 1.5f), Vector3::one, 0.02f);
         _lights.push_back(light);
-    }*/
+    }
 
     {
         Light light;
-        light.Point(Vector3(0, 0, -6), Vector3(1, 1, 1), 2.0f, 8.0f);
+        light.Point(Vector3(0, 2, -6), Vector3(1, 1, 1), 2.0f, 8.0f);
         _lights.push_back(light);
     }
 
-    /*{
+    {
         Light light;
-        light.Spot(Vector3(4, 0, 0), Vector3::back, Vector3(0, 1, 0), 5, 12, 30, 0.0f);
+        light.Spot(Vector3(0, 2, -6), Vector3::forward, Vector3(0.9f, 0.9f, 1), 5, 12, 30, 0.0f);
         _lights.push_back(light);
-    }*/
+    }
 
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
     glCullFace(GL_BACK);
 
-    glClearColor(0.1f, 0.1f, 0.1f, 0.0f);
+    glClearColor(0.05f, 0.05f, 0.05f, 0.0f);
 }
 
 void Application::Update()
@@ -231,25 +294,15 @@ void Application::Render()
 
     Vector3 camPos = _camera.GetPosition();
 
-    _entities[1].rotation = Quaternion::AngleAxis((float)SDL_GetTicks() / 10.0f, Vector3::left);
-    _entities[1].scale = Math::SinDeg((float)SDL_GetTicks() / 11.0f) / 2 + 1;
-
-    if (_input.KeyDown(SDL_SCANCODE_I)) { _lights[0].position.z += 0.05f; }
-    if (_input.KeyDown(SDL_SCANCODE_K)) { _lights[0].position.z -= 0.05f; }
-    if (_input.KeyDown(SDL_SCANCODE_U)) { _lights[0].position.y += 0.05f; }
-    if (_input.KeyDown(SDL_SCANCODE_O)) { _lights[0].position.y -= 0.05f; }
-    if (_input.KeyDown(SDL_SCANCODE_J)) { _lights[0].position.x += 0.05f; }
-    if (_input.KeyDown(SDL_SCANCODE_L)) { _lights[0].position.x -= 0.05f; }
-    _entities[2].position = _lights[0].position;
-    
-    //_lights[3].direction = Quaternion::AngleAxis((float)SDL_GetTicks() / 50.0f, Vector3::up) * Vector3::forward;
-    //_lights[3].innerPercent = (Math::SinDeg((float)SDL_GetTicks() / 11.0f) + 1.0f) / 2.0f;
-    
     Vector3 ambient(0.1f, 0.1f, 0.1f);
     Vector3 zero;
 
     Matrix4x4 modelMatrix;
     Matrix4x4 pvm;
+
+
+    _lights[2].direction = Quaternion::AngleAxis((float)SDL_GetTicks() * 0.1f, Vector3::up) * Vector3(1, -1, 0);
+
 
     for (auto& entity : _entities)
     {

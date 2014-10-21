@@ -32,20 +32,19 @@ private:
     Program _tangentProgram;
     bool _showTangents;
 
+    StaticMesh _roomMesh;
     StaticMesh _cubeMesh;
 
     StaticMesh _suzanneMesh;
     Texture _suzanneTexture;
     Material _suzanneMaterial;
     
-    StaticMesh _roomMesh;
-    Texture _roomTexture;
-    Texture _roomNormalTexture;
-    Material _roomMaterial;
-
-    StaticMesh _cyllinderMesh;
-    Texture _cyllinderNormalTexture;
-    Material _cyllinderMaterial;
+    Texture _tileTexture;
+    Texture _tileNormalTexture;
+    Material _tileMaterial1;
+    Material _tileMaterial2;
+    Material _tileMaterial3;
+    Material _tileMaterial4;
 
     Texture _blendedTexture;
     Material _blendedMaterial;
