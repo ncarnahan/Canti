@@ -37,8 +37,7 @@ namespace Graphics
         Material();
 
         void Start();
-        void FirstPass();
-        void SecondPass();
+        void Pass(int pass);
 
         void SetProgram(Program& program);
         void SetBlendType(BlendType blendType) { _blendType = blendType; }

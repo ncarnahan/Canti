@@ -8,13 +8,15 @@
 
 namespace Graphics
 {
+    class DrawCall;
+
     class StaticMesh
     {
     private:
         GLuint vao;
         GLuint vbo; //Buffer for storing vertex information
         GLuint eab; //Buffer for storing index information
-        unsigned int size;
+        GLsizei size;
 
 
     public:
@@ -23,8 +25,7 @@ namespace Graphics
         bool LoadObjFile(const char* fileName);
         void BufferData(std::vector<Vertex>& vertices, std::vector<GLuint>& indices);
 
-        void Draw();
-        void DrawPoints();
+        void FillDrawCall(DrawCall& drawCall);
 
     private:
         void GenerateVao();

@@ -3,6 +3,55 @@
 
 namespace Graphics
 {
+    void FirstPass(BlendType blendType){
+        glDepthMask(GL_TRUE);
+        glDepthFunc(GL_LESS);
+
+        //Set up blending
+        if (blendType == BlendType::Opaque || blendType == BlendType::AlphaTested)
+        {
+            glDisable(GL_BLEND);
+        }
+        else
+        {
+            glDepthMask(GL_FALSE);
+            glEnable(GL_BLEND);
+            if (blendType == BlendType::Additive)
+            {
+                glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+            }
+            else
+            {
+                glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+            }
+        }
+    }
+
+    void SecondPass(BlendType blendType)
+    {
+        glDepthMask(GL_FALSE);
+        glDepthFunc(GL_LEQUAL);
+        glEnable(GL_BLEND);
+
+        if (blendType == BlendType::Opaque || blendType == BlendType::AlphaTested)
+        {
+            glBlendFunc(GL_ONE, GL_ONE);
+        }
+        else
+        {
+            if (blendType == BlendType::Additive)
+            {
+                glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+            }
+            else
+            {
+                glBlendFunc(GL_SRC_ALPHA, GL_DST_ALPHA);
+            }
+        }
+    }
+
+
+
     Material::Material() :
         _blendType(BlendType::Opaque),
         _useLighting(true)
@@ -13,8 +62,6 @@ namespace Graphics
     void Material::Start()
     {
         _program->Start();
-
-        FirstPass();
 
         //Bind textures
         for (size_t i = 0; i < _textures.size(); i++)
@@ -37,51 +84,15 @@ namespace Graphics
         }
     }
 
-    void Material::FirstPass()
+    void Material::Pass(int pass)
     {
-        glDepthMask(GL_TRUE);
-        glDepthFunc(GL_LESS);
-
-        //Set up blending
-        if (_blendType == BlendType::Opaque || _blendType == BlendType::AlphaTested)
+        if (pass == 0)
         {
-            glDisable(GL_BLEND);
+            FirstPass(_blendType);
         }
         else
         {
-            glDepthMask(GL_FALSE);
-            glEnable(GL_BLEND);
-            if (_blendType == BlendType::Additive)
-            {
-                glBlendFunc(GL_SRC_ALPHA, GL_ONE);
-            }
-            else
-            {
-                glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-            }
-        }
-    }
-
-    void Material::SecondPass()
-    {
-        glDepthMask(GL_FALSE);
-        glDepthFunc(GL_LEQUAL);
-        glEnable(GL_BLEND);
-
-        if (_blendType == BlendType::Opaque || _blendType == BlendType::AlphaTested)
-        {
-            glBlendFunc(GL_ONE, GL_ONE);
-        }
-        else
-        {
-            if (_blendType == BlendType::Additive)
-            {
-                glBlendFunc(GL_SRC_ALPHA, GL_ONE);
-            }
-            else
-            {
-                glBlendFunc(GL_SRC_ALPHA, GL_DST_ALPHA);
-            }
+            SecondPass(_blendType);
         }
     }
 

@@ -1,11 +1,13 @@
 #include "StaticMesh.h"
 #include "Program.h"
+#include "DrawCall.h"
 #include <iostream>
 #include <fstream>
 #include <sstream>
 #include <unordered_map>
 #include <Utils/Parse.h>
 using namespace Utils;
+
 
 namespace Graphics
 {
@@ -109,16 +111,10 @@ namespace Graphics
             2, GL_FLOAT, false, sizeof(Vertex), (void*)offsetof(Vertex, uv));
     }
 
-    void StaticMesh::Draw()
+    void StaticMesh::FillDrawCall(DrawCall& drawCall)
     {
-        glBindVertexArray(vao);
-        glDrawElements(GL_TRIANGLES, size, GL_UNSIGNED_INT, 0);
-    }
-
-    void StaticMesh::DrawPoints()
-    {
-        glBindVertexArray(vao);
-        glDrawElements(GL_POINTS, size, GL_UNSIGNED_INT, 0);
+        drawCall.vao = vao;
+        drawCall.size = size;
     }
 
 

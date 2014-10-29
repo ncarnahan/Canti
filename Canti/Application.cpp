@@ -46,6 +46,8 @@ Application::~Application()
 
 void Application::Init()
 {
+    _renderer.SetProjectionMatrix(Matrix4x4::Perspective(65, 16.0f / 9.0f, 0.01f, 1000));
+
     //Assign the window to the camera
     _camera.SetWindow(_window);
     _camera.SetPosition(Vector3(0, 2, 0));
@@ -281,6 +283,10 @@ void Application::Simulate()
 {
     _input.Update();
     _camera.Update(0.016f, _input);
+
+
+    //Update the scene
+    _lights[2].direction = Quaternion::AngleAxis((float)SDL_GetTicks() * 0.1f, Vector3::up) * Vector3(1, -1, 0);
 }
 
 void Application::Render()
@@ -288,94 +294,69 @@ void Application::Render()
     glDepthMask(GL_TRUE);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    auto projection = Matrix4x4::Perspective(65, 16.0f / 9.0f, 0.01f, 1000);
-    auto view = _camera.GetViewMatrix();
-    auto pv = projection * view;
+    _renderer.SetViewMatrix(_camera.GetViewMatrix());
+    _renderer.SetEyePosition(_camera.GetPosition());
 
-    Vector3 camPos = _camera.GetPosition();
-
-    Vector3 ambient(0.1f, 0.1f, 0.1f);
-    Vector3 zero;
-
-    Matrix4x4 modelMatrix;
-    Matrix4x4 pvm;
+    const Vector3 ambient(0.1f, 0.1f, 0.1f);
 
 
-    _lights[2].direction = Quaternion::AngleAxis((float)SDL_GetTicks() * 0.1f, Vector3::up) * Vector3(1, -1, 0);
-
+    int pass;
+    Vector3 drawCallAmbient;
 
     for (auto& entity : _entities)
     {
-        //Use the material
-        entity.material->Start();
-
-        auto program = entity.material->GetProgram();
-
-        //TEMP: Use UBO
-        glUniformMatrix4fv(program->GetUniformLocation("in_matrixProj"), 1, false, &projection[0]);
-        glUniformMatrix4fv(program->GetUniformLocation("in_matrixView"), 1, false, &view[0]);
-        glUniform3fv(program->GetUniformLocation("in_eyePosition"), 1, &camPos[0]);
-
-        //Model matrix
-        modelMatrix = Matrix4x4::FromTransform(
-            entity.position, entity.rotation, Vector3(entity.scale));
-
-        pvm = pv * modelMatrix;
-
-        //Matrices
-        glUniformMatrix4fv(program->GetUniformLocation("in_matrixModel"), 1, false, &modelMatrix[0]);
-        glUniformMatrix4fv(program->GetUniformLocation("in_matrixPVM"), 1, false, &pvm[0]);
-
-        
-        //Ambient lighting on first pass
-        glUniform3fv(program->GetUniformLocation("light.ambient"), 1, &ambient[0]);
+        pass = 0;
+        drawCallAmbient = ambient;
 
         if (entity.material->IsLit())
         {
             for (auto& light : _lights)
             {
-                //Light uniforms
-                glUniform1i(program->GetUniformLocation("light.type"), (int)light.type);
+                DrawCall drawCall;
+                entity.mesh->FillDrawCall(drawCall);
 
-                glUniform3fv(program->GetUniformLocation("light.position"), 1, &light.position[0]);
-                glUniform3fv(program->GetUniformLocation("light.direction"), 1, &light.direction[0]);
-                glUniform3fv(program->GetUniformLocation("light.color"), 1, &light.color[0]);
-            
-                glUniform1f(program->GetUniformLocation("light.intensity"), light.intensity);
-                glUniform1f(program->GetUniformLocation("light.radius"), light.radius);
-                glUniform1f(program->GetUniformLocation("light.cosAngle"), Math::CosDeg(light.angle));
-                glUniform1f(program->GetUniformLocation("light.innerPercent"), light.innerPercent);
-            
+                drawCall.pass = pass;
+                drawCall.material = entity.material;
+                drawCall.modelMatrix = Matrix4x4::FromTransform(
+                    entity.position, entity.rotation, Vector3(entity.scale));
+                drawCall.ambientLight = drawCallAmbient;
+                drawCall.light = &light;
 
-                //Draw
-                entity.mesh->Draw();
-
-
-                entity.material->SecondPass();
+                _renderer.Submit(drawCall);
 
                 //Disable ambient for future passes
-                glUniform3fv(program->GetUniformLocation("light.ambient"), 1, &zero[0]);
+                drawCallAmbient = Vector3(0);
+                pass++;
             }
         }
         else
         {
-            //Draw
-            entity.mesh->Draw();
+            DrawCall drawCall;
+            entity.mesh->FillDrawCall(drawCall);
+
+            drawCall.pass = pass;
+            drawCall.material = entity.material;
+            drawCall.modelMatrix = Matrix4x4::FromTransform(
+                entity.position, entity.rotation, Vector3(entity.scale));
+
+            _renderer.Submit(drawCall);
         }
         
 
         //Tangent Visualization
         if (_showTangents)
         {
-            program = &_tangentProgram;
+            /*program = &_tangentProgram;
             program->Start();
             glUniformMatrix4fv(program->GetUniformLocation("in_matrixProj"), 1, false, &projection[0]);
             glUniformMatrix4fv(program->GetUniformLocation("in_matrixView"), 1, false, &view[0]);
             glUniformMatrix4fv(program->GetUniformLocation("in_matrixModel"), 1, false, &modelMatrix[0]);
             glUniformMatrix4fv(program->GetUniformLocation("in_matrixPVM"), 1, false, &pvm[0]);
-            entity.mesh->DrawPoints();
+            entity.mesh->DrawPoints();*/
         }
     }
+
+    _renderer.Draw();
     
     auto error = glGetError();
     if (error != GL_NO_ERROR)
