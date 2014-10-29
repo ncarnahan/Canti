@@ -53,8 +53,8 @@ namespace Graphics
 
 
     Material::Material() :
-        _blendType(BlendType::Opaque),
-        _useLighting(true)
+        blendType(BlendType::Opaque),
+        useLighting(true)
     {
 
     }
@@ -88,11 +88,11 @@ namespace Graphics
     {
         if (pass == 0)
         {
-            FirstPass(_blendType);
+            FirstPass(blendType);
         }
         else
         {
-            SecondPass(_blendType);
+            SecondPass(blendType);
         }
     }
 

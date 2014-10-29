@@ -1,6 +1,7 @@
 #include "Renderer.h"
 #include "Material.h"
 #include "Light.h"
+#include <algorithm>
 
 namespace Graphics
 {
@@ -21,25 +22,58 @@ namespace Graphics
 
 
 
-    Renderer::Renderer()
+    Renderer::Renderer() :
+        _lastMaterialId(0),
+        sortEnabled(true)
     {
-        
     }
 
-    void Renderer::Submit(DrawCall& drawCall)
+    SortKey Renderer::CreateSortKey(float depth, Material* material, uint8_t pass)
     {
-        _drawCalls.push_back(drawCall);
+        uint32_t materialId;
+
+        auto iter = _materialMap.find(material);
+        if (iter == _materialMap.end())
+        {
+            materialId = _lastMaterialId++;
+
+            //Add to the hashmap for later
+            _materialMap.insert(
+                std::pair<Material*, uint32_t>(material, materialId));
+        }
+        else
+        {
+            //It already exists, use the existing ID
+            materialId = iter->second;
+        }
+
+        return SortKey(material->blendType, depth, materialId, pass);
+    }
+
+    void Renderer::Submit(SortKey key, DrawCall& drawCall)
+    {
+        DrawCallPair pair;
+        pair.key = key;
+        pair.drawCall = drawCall;
+        _drawCalls.push_back(pair);
     }
 
     void Renderer::Draw()
     {
+        if (sortEnabled)
+        {
+            std::sort(_drawCalls.begin(), _drawCalls.end());
+        }
+
         Material* lastMaterial = nullptr;
 
         Matrix4x4 pvMatrix = _projectionMatrix * _viewMatrix;
         Matrix4x4 pvmMatrix;
 
-        for (auto& drawCall : _drawCalls)
+        for (auto& drawCallPair : _drawCalls)
         {
+            auto& drawCall = drawCallPair.drawCall;
+
             //Use the material
             if (drawCall.material != lastMaterial)
             {
@@ -63,7 +97,7 @@ namespace Graphics
 
 
             //Apply the light
-            if (drawCall.material->IsLit())
+            if (drawCall.material->useLighting)
             {
                 UseLight(drawCall.material->GetProgram(), drawCall.light);
             }

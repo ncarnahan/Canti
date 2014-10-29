@@ -101,16 +101,16 @@ void Application::Init()
     _tileMaterial4.SetFloat("material.specularExponent", 100);
 
     _blendedMaterial.SetProgram(_diffuseProgram);
-    _blendedMaterial.SetBlendType(BlendType::Transparent);
+    _blendedMaterial.blendType = BlendType::Transparent;
     _blendedMaterial.SetTexture("tex_diffuse", _blendedTexture);
 
     _cutoutMaterial.SetProgram(_cutoutProgram);
-    _cutoutMaterial.SetBlendType(BlendType::AlphaTested);
+    _cutoutMaterial.blendType = BlendType::AlphaTested;
     _cutoutMaterial.SetTexture("tex_diffuse", _blendedTexture);
     _cutoutMaterial.SetFloat("material.cutoff", 0.5f);
 
     _particleMaterial.SetProgram(_additiveProgram);
-    _particleMaterial.SetBlendType(BlendType::Additive);
+    _particleMaterial.blendType = BlendType::Additive;
     _particleMaterial.SetTexture("tex_diffuse", _particleTexture);
 
     
@@ -272,6 +272,7 @@ void Application::Update()
     }
 
     if (_input.KeyPressed(SDL_SCANCODE_T)) { _showTangents = !_showTangents; }
+    if (_input.KeyPressed(SDL_SCANCODE_R)) { _renderer.sortEnabled = !_renderer.sortEnabled; }
 
     Simulate();
     Render();
@@ -300,7 +301,7 @@ void Application::Render()
     const Vector3 ambient(0.1f, 0.1f, 0.1f);
 
 
-    int pass;
+    uint8_t pass;
     Vector3 drawCallAmbient;
 
     for (auto& entity : _entities)
@@ -308,7 +309,7 @@ void Application::Render()
         pass = 0;
         drawCallAmbient = ambient;
 
-        if (entity.material->IsLit())
+        if (entity.material->useLighting)
         {
             for (auto& light : _lights)
             {
@@ -322,7 +323,11 @@ void Application::Render()
                 drawCall.ambientLight = drawCallAmbient;
                 drawCall.light = &light;
 
-                _renderer.Submit(drawCall);
+                auto sortKey = _renderer.CreateSortKey(
+                    Vector3::DistanceSqr(_camera.GetPosition(), entity.position),
+                    entity.material, pass);
+
+                _renderer.Submit(sortKey, drawCall);
 
                 //Disable ambient for future passes
                 drawCallAmbient = Vector3(0);
@@ -339,7 +344,11 @@ void Application::Render()
             drawCall.modelMatrix = Matrix4x4::FromTransform(
                 entity.position, entity.rotation, Vector3(entity.scale));
 
-            _renderer.Submit(drawCall);
+            auto sortKey = _renderer.CreateSortKey(
+                Vector3::DistanceSqr(_camera.GetPosition(), entity.position),
+                entity.material, pass);
+
+            _renderer.Submit(sortKey, drawCall);
         }
         
 

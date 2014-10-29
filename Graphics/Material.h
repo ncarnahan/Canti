@@ -20,13 +20,11 @@ namespace Graphics
     class Material
     {
     private:
+        Program* _program;
+
         struct PropTexture { GLint uniform; Texture* texture; };
         struct PropFloat { GLint uniform; float value; };
         struct PropVector3 { GLint uniform; Vector3 value; };
-
-        Program* _program;
-        BlendType _blendType;
-        bool _useLighting;
 
         //The first item of the pair is the shader uniform location
         std::vector<PropTexture> _textures;
@@ -34,14 +32,16 @@ namespace Graphics
         std::vector<PropVector3> _vector3Storage;
 
     public:
+        BlendType blendType;
+        bool useLighting;
+
+
         Material();
 
         void Start();
         void Pass(int pass);
 
         void SetProgram(Program& program);
-        void SetBlendType(BlendType blendType) { _blendType = blendType; }
-        void SetLighting(bool useLighting) { _useLighting = useLighting; }
         void SetTexture(GLint location, Texture& texture);
         void SetFloat(GLint location, float value);
         void SetVector3(GLint location, Vector3 value);
@@ -62,7 +62,6 @@ namespace Graphics
         }
 
         inline Program* GetProgram() { return _program; }
-        inline bool IsLit() { return _useLighting; }
     };
 }
 

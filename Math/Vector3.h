@@ -99,6 +99,11 @@ namespace Math
             return (point1 - point2).Magnitude();
         }
 
+        inline static float DistanceSqr(const Vector3& point1, const Vector3& point2)
+        {
+            return (point1 - point2).MagnitudeSqr();
+        }
+
         inline static Vector3 Lerp(const Vector3& start, const Vector3& end, float t)
         {
             return start + t * (end - start);
