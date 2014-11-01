@@ -29,6 +29,7 @@ namespace Graphics
 
     public:
         bool sortEnabled;
+        int ignoreCount;
 
         Renderer();
         

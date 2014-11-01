@@ -24,7 +24,8 @@ namespace Graphics
 
     Renderer::Renderer() :
         _lastMaterialId(0),
-        sortEnabled(true)
+        sortEnabled(true),
+        ignoreCount(0)
     {
     }
 
@@ -70,9 +71,9 @@ namespace Graphics
         Matrix4x4 pvMatrix = _projectionMatrix * _viewMatrix;
         Matrix4x4 pvmMatrix;
 
-        for (auto& drawCallPair : _drawCalls)
+        for (size_t i = 0; i < _drawCalls.size() - ignoreCount; i++)
         {
-            auto& drawCall = drawCallPair.drawCall;
+            auto& drawCall = _drawCalls[i].drawCall;
 
             //Use the material
             if (drawCall.material != lastMaterial)
