@@ -3,6 +3,7 @@
 
 #include <Graphics/Material.h>
 #include <Graphics/StaticMesh.h>
+#include <Graphics/SortKey.h>
 using namespace Graphics;
 #include <Math/Vector3.h>
 #include <Math/Quaternion.h>
@@ -12,6 +13,7 @@ struct Entity
 {
     StaticMesh* mesh;
     Material* material;
+    SortKey sortKey;
 
     Vector3 position;
     Quaternion rotation;

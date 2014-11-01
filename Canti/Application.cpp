@@ -234,6 +234,12 @@ void Application::Init()
         _entities.push_back(entity);
     }
 
+    //Cache a sortkey for each entity
+    for (Entity& entity : _entities)
+    {
+        entity.sortKey = _renderer.CreateSortKey(0, entity.material, 0);
+    }
+
 
     {
         Light light;
@@ -309,6 +315,10 @@ void Application::Render()
         pass = 0;
         drawCallAmbient = ambient;
 
+        //Update sort key depth
+        entity.sortKey.UpdateDepth(
+            Vector3::DistanceSqr(_camera.GetPosition(), entity.position));
+
         if (entity.material->useLighting)
         {
             for (auto& light : _lights)
@@ -323,11 +333,9 @@ void Application::Render()
                 drawCall.ambientLight = drawCallAmbient;
                 drawCall.light = &light;
 
-                auto sortKey = _renderer.CreateSortKey(
-                    Vector3::DistanceSqr(_camera.GetPosition(), entity.position),
-                    entity.material, pass);
+                entity.sortKey.UpdatePass(pass);
 
-                _renderer.Submit(sortKey, drawCall);
+                _renderer.Submit(entity.sortKey, drawCall);
 
                 //Disable ambient for future passes
                 drawCallAmbient = Vector3(0);
@@ -344,11 +352,9 @@ void Application::Render()
             drawCall.modelMatrix = Matrix4x4::FromTransform(
                 entity.position, entity.rotation, Vector3(entity.scale));
 
-            auto sortKey = _renderer.CreateSortKey(
-                Vector3::DistanceSqr(_camera.GetPosition(), entity.position),
-                entity.material, pass);
+            entity.sortKey.UpdatePass(pass);
 
-            _renderer.Submit(sortKey, drawCall);
+            _renderer.Submit(entity.sortKey, drawCall);
         }
         
 

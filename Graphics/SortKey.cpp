@@ -58,13 +58,25 @@ namespace Graphics
     void SortKey::UpdateDepth(float depth)
     {
         int offset = 0;
-        if (GetBlendType() == BlendType::Transparent) { offset = MATERIAL_BITS; }
+        BlendType blendType = GetBlendType();
+        if (blendType == BlendType::Transparent) { offset = MATERIAL_BITS; }
 
         //Clear depth
-        key &= (DEPTH_MASK << offset);
+        key &= ~(DEPTH_MASK << offset);
 
         //Write new depth
-        uint64_t depthBits = DepthConvert(depth) << offset;
-        key |= depthBits;
+        uint64_t depthBits = DepthConvert(depth);
+        if (blendType == BlendType::Transparent) { depthBits ^= DEPTH_MASK; }
+        key |= (depthBits << offset);
+    }
+
+    void SortKey::UpdatePass(uint8_t pass)
+    {
+        //Clear pass
+        key &= ~PASS_MASK;
+
+        //Write new pass
+        uint64_t passBits = (pass & PASS_MASK);
+        key |= passBits;
     }
 }

@@ -16,6 +16,7 @@ namespace Graphics
 
         BlendType GetBlendType();
         void UpdateDepth(float depth);
+        void UpdatePass(uint8_t pass);
 
         inline bool operator<(const SortKey& other) const
         {
