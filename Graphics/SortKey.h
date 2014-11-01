@@ -1,3 +1,6 @@
+#ifndef GRAPHICS_SORT_KEY_H
+#define GRAPHICS_SORT_KEY_H
+
 #include <cstdint>
 #include "Material.h"
 
@@ -20,3 +23,5 @@ namespace Graphics
         }
     };
 }
+
+#endif

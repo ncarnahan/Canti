@@ -1,3 +1,6 @@
+#ifndef GRAPHICS_DRAW_CALL_H
+#define GRAPHICS_DRAW_CALL_H
+
 #include "OpenGL.h"
 #include <Math/Matrix4x4.h>
 using namespace Math;
@@ -32,3 +35,5 @@ namespace Graphics
         }
     };
 }
+
+#endif

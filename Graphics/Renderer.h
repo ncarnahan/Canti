@@ -1,3 +1,6 @@
+#ifndef GRAPHICS_RENDERER_H
+#define GRAPHICS_RENDERER_H
+
 #include "DrawCall.h"
 #include "SortKey.h"
 #include <vector>
@@ -38,3 +41,5 @@ namespace Graphics
         void SetEyePosition(Vector3 eyePosition) { _eyePosition = eyePosition; }
     };
 }
+
+#endif
