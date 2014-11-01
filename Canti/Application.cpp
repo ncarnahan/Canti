@@ -339,7 +339,7 @@ void Application::Render()
 
                 //Disable ambient for future passes
                 drawCallAmbient = Vector3(0);
-                pass++;
+                pass = 1;
             }
         }
         else
