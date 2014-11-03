@@ -79,6 +79,9 @@ void Application::Init()
     normalSettings.filter = Graphics::TextureFilter::Trilinear;
     _tileNormalTexture.Load("Data/TilesNormal.png", normalSettings);
 
+    _tangentMaterial.SetProgram(_tangentProgram);
+    _tangentMaterial.useLighting = false;
+
     _suzanneMaterial.SetProgram(_diffuseProgram);
     _suzanneMaterial.SetTexture("tex_diffuse", _suzanneTexture);
 
@@ -115,15 +118,6 @@ void Application::Init()
     _particleMaterial.SetTexture("tex_diffuse", _particleTexture);
 
     
-    {
-        Entity entity;
-        entity.mesh = &_roomMesh;
-        entity.material = &_tileMaterial4;
-        entity.position = Vector3(0, -2, -8);
-        entity.scale = 2;
-        _entities.push_back(entity);
-    }
-
     //Suzanne
     {
         Entity entity;
@@ -232,6 +226,14 @@ void Application::Init()
         entity.mesh = &_cubeMesh;
         entity.material = &_particleMaterial;
         entity.position = Vector3(6, 0, -6);
+        _entities.push_back(entity);
+    }
+
+    {
+        Entity entity;
+        entity.mesh = &_cubeMesh;
+        entity.material = &_particleMaterial;
+        entity.position = Vector3(0, 0, -16);
         _entities.push_back(entity);
     }
 
@@ -365,13 +367,18 @@ void Application::Render()
         //Tangent Visualization
         if (_showTangents)
         {
-            /*program = &_tangentProgram;
-            program->Start();
-            glUniformMatrix4fv(program->GetUniformLocation("in_matrixProj"), 1, false, &projection[0]);
-            glUniformMatrix4fv(program->GetUniformLocation("in_matrixView"), 1, false, &view[0]);
-            glUniformMatrix4fv(program->GetUniformLocation("in_matrixModel"), 1, false, &modelMatrix[0]);
-            glUniformMatrix4fv(program->GetUniformLocation("in_matrixPVM"), 1, false, &pvm[0]);
-            entity.mesh->DrawPoints();*/
+            DrawCall drawCall;
+            entity.mesh->FillDrawCall(drawCall);
+
+            drawCall.pass = 2;
+            drawCall.material = &_tangentMaterial;
+            drawCall.drawMode = GL_POINTS;
+            drawCall.modelMatrix = Matrix4x4::FromTransform(
+                entity.position, entity.rotation, Vector3(entity.scale));
+
+            entity.sortKey.UpdatePass(2);
+
+            _renderer.Submit(entity.sortKey, drawCall);
         }
     }
 

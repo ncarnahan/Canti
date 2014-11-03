@@ -17,6 +17,7 @@ namespace Graphics
 
         Matrix4x4 modelMatrix;
 
+        GLenum drawMode;
         GLuint vao;
         GLsizei size;
 
@@ -27,6 +28,7 @@ namespace Graphics
 
         DrawCall() :
             pass(0),
+            drawMode(GL_TRIANGLES),
             vao(0),
             size(0),
             material(nullptr),

@@ -109,7 +109,7 @@ namespace Graphics
 
 
             glBindVertexArray(drawCall.vao);
-            glDrawElements(GL_TRIANGLES, drawCall.size, GL_UNSIGNED_INT, 0);
+            glDrawElements(drawCall.drawMode, drawCall.size, GL_UNSIGNED_INT, 0);
         }
 
         _drawCalls.clear();

@@ -34,6 +34,8 @@ private:
     Program _tangentProgram;
     bool _showTangents;
 
+    Material _tangentMaterial;
+
     StaticMesh _roomMesh;
     StaticMesh _cubeMesh;
 
