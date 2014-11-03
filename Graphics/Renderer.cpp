@@ -71,7 +71,7 @@ namespace Graphics
         Matrix4x4 pvMatrix = _projectionMatrix * _viewMatrix;
         Matrix4x4 pvmMatrix;
 
-        for (size_t i = 0; i < _drawCalls.size() - ignoreCount; i++)
+        for (int i = 0; i < (int)_drawCalls.size() - ignoreCount; i++)
         {
             auto& drawCall = _drawCalls[i].drawCall;
 
