@@ -5,6 +5,7 @@
 
 Application::Application() :
     _running(true),
+    _updateScene(true),
     _showTangents(false)
 {
     //Initialize SDL
@@ -118,6 +119,22 @@ void Application::Init()
     _particleMaterial.SetTexture("tex_diffuse", _particleTexture);
 
     
+    {
+        Entity entity;
+        entity.mesh = &_cubeMesh;
+        entity.material = &_blendedMaterial;
+        entity.position = Vector3(0, 0, -16);
+        _entities.push_back(entity);
+    }
+
+    {
+        Entity entity;
+        entity.mesh = &_cubeMesh;
+        entity.material = &_blendedMaterial;
+        entity.position = Vector3(0, 0, -16);
+        _entities.push_back(entity);
+    }
+
     //Suzanne
     {
         Entity entity;
@@ -229,14 +246,6 @@ void Application::Init()
         _entities.push_back(entity);
     }
 
-    {
-        Entity entity;
-        entity.mesh = &_cubeMesh;
-        entity.material = &_particleMaterial;
-        entity.position = Vector3(0, 0, -16);
-        _entities.push_back(entity);
-    }
-
     //Cache a sortkey for each entity
     for (Entity& entity : _entities)
     {
@@ -280,13 +289,19 @@ void Application::Update()
         }
     }
 
+    _input.Update();
+
+    if (_input.KeyPressed(SDL_SCANCODE_SPACE)) { _updateScene = !_updateScene; }
     if (_input.KeyPressed(SDL_SCANCODE_T)) { _showTangents = !_showTangents; }
     if (_input.KeyPressed(SDL_SCANCODE_R)) { _renderer.sortEnabled = !_renderer.sortEnabled; }
     if (_input.KeyPressed(SDL_SCANCODE_MINUS)) { _renderer.ignoreCount++; }
     if (_input.KeyPressed(SDL_SCANCODE_EQUALS)) { _renderer.ignoreCount = Math::Max(_renderer.ignoreCount - 1, 0); }
     std::cout << "Ignoring: " << _renderer.ignoreCount << std::endl;
 
-    Simulate();
+    if (_updateScene)
+    {
+        Simulate();
+    }
     Render();
 
     SDL_GL_SwapWindow(_window);
@@ -294,12 +309,15 @@ void Application::Update()
 
 void Application::Simulate()
 {
-    _input.Update();
     _camera.Update(0.016f, _input);
 
 
     //Update the scene
     _lights[2].direction = Quaternion::AngleAxis((float)SDL_GetTicks() * 0.1f, Vector3::up) * Vector3(1, -1, 0);
+    float theta = (float)SDL_GetTicks() * 0.1f;
+    _entities[0].position = Vector3(Math::CosDeg(theta) * 12, 0, Math::SinDeg(theta) * 12 - 8);
+    theta *= 1.2f;
+    _entities[1].position = Vector3(Math::CosDeg(theta) * 12, 2, Math::SinDeg(theta) * 12 - 8);
 }
 
 void Application::Render()

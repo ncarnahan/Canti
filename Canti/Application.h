@@ -21,6 +21,8 @@ private:
     SDL_Window* _window;
     SDL_GLContext _context;
 
+    bool _updateScene;
+
     Renderer _renderer;
     Input _input;
     FpsCamera _camera;
