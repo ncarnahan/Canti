@@ -118,7 +118,7 @@ void Application::Init()
     _particleMaterial.useLighting = false;
     _particleMaterial.SetTexture("tex_diffuse", _particleTexture);
 
-    
+    for (int i = 0; i < 4; i++)
     {
         Entity entity;
         entity.mesh = &_cubeMesh;
@@ -127,6 +127,7 @@ void Application::Init()
         _entities.push_back(entity);
     }
 
+    for (int i = 0; i < 6; i++)
     {
         Entity entity;
         entity.mesh = &_cubeMesh;
@@ -267,7 +268,7 @@ void Application::Init()
 
     {
         Light light;
-        light.Spot(Vector3(0, 2, -6), Vector3::forward, Vector3(0.9f, 0.9f, 1), 5, 12, 30, 0.0f);
+        light.Point(Vector3(0, 2, 8), Vector3(1, 1, 1), 1.0f, 8.0f);
         _lights.push_back(light);
     }
 
@@ -298,10 +299,7 @@ void Application::Update()
     if (_input.KeyPressed(SDL_SCANCODE_EQUALS)) { _renderer.ignoreCount = Math::Max(_renderer.ignoreCount - 1, 0); }
     std::cout << "Ignoring: " << _renderer.ignoreCount << std::endl;
 
-    if (_updateScene)
-    {
-        Simulate();
-    }
+    Simulate();
     Render();
 
     SDL_GL_SwapWindow(_window);
@@ -313,11 +311,25 @@ void Application::Simulate()
 
 
     //Update the scene
-    _lights[2].direction = Quaternion::AngleAxis((float)SDL_GetTicks() * 0.1f, Vector3::up) * Vector3(1, -1, 0);
-    float theta = (float)SDL_GetTicks() * 0.1f;
-    _entities[0].position = Vector3(Math::CosDeg(theta) * 12, 0, Math::SinDeg(theta) * 12 - 8);
-    theta *= 1.2f;
-    _entities[1].position = Vector3(Math::CosDeg(theta) * 12, 2, Math::SinDeg(theta) * 12 - 8);
+    if (_updateScene)
+    {
+        float theta = (float)SDL_GetTicks() * 0.1f;
+        for (int i = 0; i < 4; i++)
+        {
+            _entities[i].position = Vector3(Math::CosDeg(theta) * 3, 0, Math::SinDeg(theta) * 3 + 8);
+            _entities[i].rotation = Quaternion::AngleAxis(theta, Vector3::up);
+            theta += 90;
+        }
+
+        theta *= -1;
+
+        for (int i = 4; i < 10; i++)
+        {
+            _entities[i].position = Vector3(Math::CosDeg(theta) * 6, 0, Math::SinDeg(theta) * 6 + 8);
+            _entities[i].rotation = Quaternion::AngleAxis(theta, Vector3::up);
+            theta += 60;
+        }
+    }
 }
 
 void Application::Render()
