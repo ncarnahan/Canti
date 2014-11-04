@@ -9,7 +9,7 @@ namespace Graphics
     class SortKey
     {
     public:
-        uint64_t key;
+        uint32_t key;
 
         SortKey() : key(0) { }
         SortKey(BlendType blendType, float depth, uint32_t materialId, uint8_t pass);
