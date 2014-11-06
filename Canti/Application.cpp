@@ -276,7 +276,9 @@ void Application::Init()
     glEnable(GL_CULL_FACE);
     glCullFace(GL_BACK);
 
-    glClearColor(0.05f, 0.05f, 0.05f, 0.0f);
+    float v = pow(0.05f, 2.2f);
+    glClearColor(v, v, v, 0.0f);
+    glEnable(GL_FRAMEBUFFER_SRGB);
 }
 
 void Application::Update()

@@ -96,10 +96,5 @@ void main() {
     //Combine light components
     vec3 lighting = diffuse + specular + ambient;
 
-
-    //Gamma correction
-    vec3 gamma = vec3(1.0 / 2.2);
-    vec3 final = pow(texColor * lighting, gamma);
-
-    out_color = vec4(final, 1);
+    out_color = vec4(texColor * lighting, 1);
 }

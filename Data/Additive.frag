@@ -12,8 +12,4 @@ out vec4 out_color;
 
 void main() {
     out_color = texture(tex_diffuse, v2f_uv.st);
-    
-    //Gamma correction
-    vec3 gamma = vec3(1.0 / 2.2);
-    out_color.rgb = pow(out_color.rgb, gamma);
 }
