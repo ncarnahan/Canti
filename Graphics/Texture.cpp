@@ -51,6 +51,9 @@ namespace Graphics
     {
         auto surface = IMG_Load(fileName);
         
+        _width = surface->w;
+        _height = surface->h;
+
         glGenTextures(1, &_textureId);
         glBindTexture(GL_TEXTURE_2D, _textureId);
 

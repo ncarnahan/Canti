@@ -32,6 +32,7 @@ namespace Graphics
     {
     private:
         GLuint _textureId;
+        uint32_t _width, _height;
 
     public:
         Texture();
@@ -40,6 +41,9 @@ namespace Graphics
         bool Load(const char* fileName);
         bool Load(const char* fileName, TextureLoadSettings& settings);
         void Bind();
+
+        uint32_t GetWidth() { return _width; }
+        uint32_t GetHeight() { return _height; }
     };
 }
 
