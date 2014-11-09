@@ -118,123 +118,10 @@ void Application::Init()
     _particleMaterial.useLighting = false;
     _particleMaterial.SetTexture("tex_diffuse", _particleTexture);
 
-    for (int i = 0; i < 4; i++)
-    {
-        Entity entity;
-        entity.mesh = &_cubeMesh;
-        entity.material = &_blendedMaterial;
-        entity.position = Vector3(0, 0, -16);
-        _entities.push_back(entity);
-    }
-
-    for (int i = 0; i < 6; i++)
-    {
-        Entity entity;
-        entity.mesh = &_cubeMesh;
-        entity.material = &_blendedMaterial;
-        entity.position = Vector3(0, 0, -16);
-        _entities.push_back(entity);
-    }
-
-    //Suzanne
-    {
-        Entity entity;
-        entity.mesh = &_suzanneMesh;
-        entity.material = &_suzanneMaterial;
-        entity.position = Vector3(0, 0, -14);
-        entity.scale = 2;
-        _entities.push_back(entity);
-    }
-
-    //Four solid cubes
     {
         Entity entity;
         entity.mesh = &_cubeMesh;
         entity.material = &_tileMaterial1;
-        entity.position = Vector3(-6, 0, -2);
-        _entities.push_back(entity);
-    }
-
-    {
-        Entity entity;
-        entity.mesh = &_cubeMesh;
-        entity.material = &_tileMaterial2;
-        entity.position = Vector3(-2, 0, -2);
-        _entities.push_back(entity);
-    }
-
-    {
-        Entity entity;
-        entity.mesh = &_cubeMesh;
-        entity.material = &_tileMaterial3;
-        entity.position = Vector3(2, 0, -2);
-        _entities.push_back(entity);
-    }
-
-    {
-        Entity entity;
-        entity.mesh = &_cubeMesh;
-        entity.material = &_tileMaterial4;
-        entity.position = Vector3(6, 0, -2);
-        _entities.push_back(entity);
-    }
-
-
-    //Four blended cubes
-    {
-        Entity entity;
-        entity.mesh = &_cubeMesh;
-        entity.material = &_blendedMaterial;
-        entity.position = Vector3(-6, 0, -10);
-        _entities.push_back(entity);
-    }
-
-    {
-        Entity entity;
-        entity.mesh = &_cubeMesh;
-        entity.material = &_blendedMaterial;
-        entity.position = Vector3(-2, 0, -10);
-        _entities.push_back(entity);
-    }
-
-    {
-        Entity entity;
-        entity.mesh = &_cubeMesh;
-        entity.material = &_blendedMaterial;
-        entity.position = Vector3(2, 0, -10);
-        _entities.push_back(entity);
-    }
-
-    {
-        Entity entity;
-        entity.mesh = &_cubeMesh;
-        entity.material = &_blendedMaterial;
-        entity.position = Vector3(6, 0, -10);
-        _entities.push_back(entity);
-    }
-
-
-    //Four different transparency cubes
-    {
-        Entity entity;
-        entity.mesh = &_cubeMesh;
-        entity.material = &_tileMaterial1;
-        entity.position = Vector3(-6, 0, -6);
-        _entities.push_back(entity);
-    }
-
-    {
-        Entity entity;
-        entity.mesh = &_cubeMesh;
-        entity.material = &_cutoutMaterial;
-        entity.position = Vector3(-2, 0, -6);
-        _entities.push_back(entity);
-    }
-
-    {
-        Entity entity;
-        entity.mesh = &_cubeMesh;
-        entity.material = &_blendedMaterial;
         entity.position = Vector3(2, 0, -6);
         _entities.push_back(entity);
     }
@@ -242,8 +129,40 @@ void Application::Init()
     {
         Entity entity;
         entity.mesh = &_cubeMesh;
-        entity.material = &_particleMaterial;
-        entity.position = Vector3(6, 0, -6);
+        entity.material = &_tileMaterial3;
+        entity.position = Vector3(2, 0, -4);
+        _entities.push_back(entity);
+    }
+
+    {
+        Entity entity;
+        entity.mesh = &_cubeMesh;
+        entity.material = &_blendedMaterial;
+        entity.position = Vector3(2, 0, -2);
+        _entities.push_back(entity);
+    }
+
+    {
+        Entity entity;
+        entity.mesh = &_cubeMesh;
+        entity.material = &_tileMaterial1;
+        entity.position = Vector3(-2, 0, -6);
+        _entities.push_back(entity);
+    }
+
+    {
+        Entity entity;
+        entity.mesh = &_cubeMesh;
+        entity.material = &_tileMaterial3;
+        entity.position = Vector3(-2, 0, -4);
+        _entities.push_back(entity);
+    }
+
+    {
+        Entity entity;
+        entity.mesh = &_cubeMesh;
+        entity.material = &_blendedMaterial;
+        entity.position = Vector3(-2, 0, -2);
         _entities.push_back(entity);
     }
 
@@ -256,19 +175,13 @@ void Application::Init()
 
     {
         Light light;
-        light.Directional(Vector3(0.5f, 1, 1.5f), Vector3::one, 0.02f);
+        light.Point(Vector3(0, 2, -8), Vector3(1, 1, 1), 2.0f, 8.0f);
         _lights.push_back(light);
     }
 
     {
         Light light;
-        light.Point(Vector3(0, 2, -6), Vector3(1, 1, 1), 2.0f, 8.0f);
-        _lights.push_back(light);
-    }
-
-    {
-        Light light;
-        light.Point(Vector3(0, 2, 8), Vector3(1, 1, 1), 1.0f, 8.0f);
+        light.Point(Vector3(0, 2, 0), Vector3(1, 1, 1), 2.0f, 8.0f);
         _lights.push_back(light);
     }
 
@@ -310,28 +223,6 @@ void Application::Update()
 void Application::Simulate()
 {
     _camera.Update(0.016f, _input);
-
-
-    //Update the scene
-    if (_updateScene)
-    {
-        float theta = (float)SDL_GetTicks() * 0.1f;
-        for (int i = 0; i < 4; i++)
-        {
-            _entities[i].position = Vector3(Math::CosDeg(theta) * 3, 0, Math::SinDeg(theta) * 3 + 8);
-            _entities[i].rotation = Quaternion::AngleAxis(theta, Vector3::up);
-            theta += 90;
-        }
-
-        theta *= -1;
-
-        for (int i = 4; i < 10; i++)
-        {
-            _entities[i].position = Vector3(Math::CosDeg(theta) * 6, 0, Math::SinDeg(theta) * 6 + 8);
-            _entities[i].rotation = Quaternion::AngleAxis(theta, Vector3::up);
-            theta += 60;
-        }
-    }
 }
 
 void Application::Render()
