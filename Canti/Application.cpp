@@ -118,6 +118,9 @@ void Application::Init()
     _particleMaterial.useLighting = false;
     _particleMaterial.SetTexture("tex_diffuse", _particleTexture);
 
+    _framebuffer.Create(&_tileTexture, 24);
+
+
     {
         Entity entity;
         entity.mesh = &_cubeMesh;
@@ -215,6 +218,9 @@ void Application::Update()
     std::cout << "Ignoring: " << _renderer.ignoreCount << std::endl;
 
     Simulate();
+    _framebuffer.Start();
+    Render();
+    _framebuffer.Stop();
     Render();
 
     SDL_GL_SwapWindow(_window);

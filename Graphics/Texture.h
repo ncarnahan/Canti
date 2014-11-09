@@ -44,6 +44,7 @@ namespace Graphics
 
         uint32_t GetWidth() { return _width; }
         uint32_t GetHeight() { return _height; }
+        GLuint GetID() { return _textureId; }
     };
 }
 

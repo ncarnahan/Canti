@@ -8,6 +8,7 @@
 #include <Graphics/StaticMesh.h>
 #include <Graphics/Light.h>
 #include <Graphics/Material.h>
+#include <Graphics/Framebuffer.h>
 using namespace Graphics;
 #include <Utils/Input.h>
 using namespace Utils;
@@ -58,6 +59,8 @@ private:
 
     Texture _particleTexture;
     Material _particleMaterial;
+
+    Framebuffer _framebuffer;
 
     std::vector<Entity> _entities;
     std::vector<Light> _lights;
