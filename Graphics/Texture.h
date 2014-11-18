@@ -11,11 +11,18 @@ namespace Graphics
         Trilinear,
     };
 
+    enum class TextureClamp
+    {
+        Repeat = GL_REPEAT,
+        Clamp = GL_CLAMP,
+    };
+
     struct TextureLoadSettings
     {
         bool useSrgbColorSpace;
         bool generateMipmaps;
         TextureFilter filter;
+        TextureClamp clamp;
 
         TextureLoadSettings() :
             useSrgbColorSpace(false),
