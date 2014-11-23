@@ -130,7 +130,7 @@ void Application::Init()
         TextureFormat::Depth24, depthMapSettings);
 
     _directionalShadowMap.framebuffer.CreateDepth(_directionalShadowTexture);
-    _directionalShadowMap.bias = 0.02f;
+    _directionalShadowMap.bias = 0.0005f;
     _directionalShadowMap.strength = 0.5f;
 
 
@@ -210,6 +210,8 @@ void Application::Simulate()
     _entities[1].position = Vector3(
         5 * sin((float)SDL_GetTicks() / 400.0f), 5,
         5 * cos((float)SDL_GetTicks() / 400.0f));
+    _lights[0].rotation = Quaternion::AngleAxis((float)SDL_GetTicks() / 20.0f, Vector3::up) *
+        Quaternion::AngleAxis(-45, Vector3::right);
 }
 
 void Application::RenderShadowMaps()
@@ -223,12 +225,9 @@ void Application::RenderShadowMaps()
     Light& light = _lights[0];
     light.position = Vector3(0, 10, 0);
 
-    Matrix4x4 projMatrix = Matrix4x4::Orthographic(-10, 10, -10, 10, 0, 40);
+    Matrix4x4 projMatrix = Matrix4x4::Orthographic(-15, 15, -15, 15, -40, 40);
     _renderer.SetProjectionMatrix(projMatrix);
-    Matrix4x4 viewMatrix = Matrix4x4::FromTransform(
-        light.position,
-        Quaternion::AngleAxis(-80, Vector3::right) * Quaternion::AngleAxis(30, Vector3::up),
-        Vector3(1)).GetInverse();
+    Matrix4x4 viewMatrix = Matrix4x4::FromTransform(light.position, light.rotation, Vector3(1)).GetInverse();
     _renderer.SetViewMatrix(viewMatrix);
 
     _directionalShadowMap.matrixPV = projMatrix * viewMatrix;
