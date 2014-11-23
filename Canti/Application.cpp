@@ -47,8 +47,6 @@ Application::~Application()
 
 void Application::Init()
 {
-    _renderer.SetProjectionMatrix(Matrix4x4::Perspective(65, 16.0f / 9.0f, 0.01f, 1000));
-
     //Assign the window to the camera
     _camera.SetWindow(_window);
     _camera.SetPosition(Vector3(0, 2, 0));
@@ -117,57 +115,41 @@ void Application::Init()
     _particleMaterial.blendType = BlendType::Additive;
     _particleMaterial.useLighting = false;
     _particleMaterial.SetTexture("tex_diffuse", _particleTexture);
+    
 
-    _framebuffer.Create(&_tileTexture, 24);
+    
+    //Shadow casting stuff
+    _depthProgram.LoadFromFiles("Data/Depth.vert", "Data/Depth.frag");
+    _depthMaterial.SetProgram(_depthProgram);
+    _depthMaterial.useLighting = false;
 
+    TextureLoadSettings depthMapSettings;
+    depthMapSettings.clamp = TextureClamp::Clamp;
+    depthMapSettings.filter = TextureFilter::Nearest;
+    _directionalShadowTexture.Create(1024, 1024,
+        TextureFormat::Depth24, depthMapSettings);
+
+    _directionalShadowMap.framebuffer.CreateDepth(_directionalShadowTexture);
+    _directionalShadowMap.bias = 0.02f;
+    _directionalShadowMap.strength = 0.5f;
+
+
+    {
+        Entity entity;
+        entity.mesh = &_roomMesh;
+        entity.material = &_tileMaterial1;
+        entity.position = Vector3(0, 0, 0);
+        _entities.push_back(entity);
+    }
 
     {
         Entity entity;
         entity.mesh = &_cubeMesh;
         entity.material = &_tileMaterial1;
-        entity.position = Vector3(2, 0, -6);
+        entity.position = Vector3(0, 4, 0);
         _entities.push_back(entity);
     }
 
-    {
-        Entity entity;
-        entity.mesh = &_cubeMesh;
-        entity.material = &_tileMaterial3;
-        entity.position = Vector3(2, 0, -4);
-        _entities.push_back(entity);
-    }
-
-    {
-        Entity entity;
-        entity.mesh = &_cubeMesh;
-        entity.material = &_blendedMaterial;
-        entity.position = Vector3(2, 0, -2);
-        _entities.push_back(entity);
-    }
-
-    {
-        Entity entity;
-        entity.mesh = &_cubeMesh;
-        entity.material = &_tileMaterial1;
-        entity.position = Vector3(-2, 0, -6);
-        _entities.push_back(entity);
-    }
-
-    {
-        Entity entity;
-        entity.mesh = &_cubeMesh;
-        entity.material = &_tileMaterial3;
-        entity.position = Vector3(-2, 0, -4);
-        _entities.push_back(entity);
-    }
-
-    {
-        Entity entity;
-        entity.mesh = &_cubeMesh;
-        entity.material = &_blendedMaterial;
-        entity.position = Vector3(-2, 0, -2);
-        _entities.push_back(entity);
-    }
 
     //Cache a sortkey for each entity
     for (Entity& entity : _entities)
@@ -178,19 +160,14 @@ void Application::Init()
 
     {
         Light light;
-        light.Point(Vector3(0, 2, -8), Vector3(1, 1, 1), 2.0f, 8.0f);
-        _lights.push_back(light);
-    }
-
-    {
-        Light light;
-        light.Point(Vector3(0, 2, 0), Vector3(1, 1, 1), 2.0f, 8.0f);
+        light.Directional(Vector3(0, 1, 0), Vector3(1), 2);
+        light.position = Vector3(0, 10, 0);
+        light.shadowMap = &_directionalShadowMap;
         _lights.push_back(light);
     }
 
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
-    glCullFace(GL_BACK);
 
     float v = pow(0.05f, 2.2f);
     glClearColor(v, v, v, 0.0f);
@@ -218,9 +195,7 @@ void Application::Update()
     std::cout << "Ignoring: " << _renderer.ignoreCount << std::endl;
 
     Simulate();
-    _framebuffer.Start();
-    Render();
-    _framebuffer.Stop();
+    RenderShadowMaps();
     Render();
 
     SDL_GL_SwapWindow(_window);
@@ -229,17 +204,67 @@ void Application::Update()
 void Application::Simulate()
 {
     _camera.Update(0.016f, _input);
+
+    _entities[1].position = Vector3(
+        5 * sin((float)SDL_GetTicks() / 400.0f), 5,
+        5 * cos((float)SDL_GetTicks() / 400.0f));
+}
+
+void Application::RenderShadowMaps()
+{
+    _directionalShadowMap.framebuffer.Start();
+
+    glDepthMask(GL_TRUE);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glDisable(GL_CULL_FACE);
+
+    Light& light = _lights[0];
+    light.position = Vector3(0, 10, 0);
+
+    Matrix4x4 projMatrix = Matrix4x4::Orthographic(-10, 10, -10, 10, 0, 40);
+    _renderer.SetProjectionMatrix(projMatrix);
+    Matrix4x4 viewMatrix = Matrix4x4::FromTransform(
+        light.position,
+        Quaternion::AngleAxis(-80, Vector3::right) * Quaternion::AngleAxis(30, Vector3::up),
+        Vector3(1)).GetInverse();
+    _renderer.SetViewMatrix(viewMatrix);
+
+    _directionalShadowMap.matrixPV = projMatrix * viewMatrix;
+
+    for (auto& entity : _entities)
+    {
+        //Update sort key depth
+        entity.sortKey.UpdateDepth(
+            Vector3::DistanceSqr(_camera.GetPosition(), entity.position));
+        entity.sortKey.UpdatePass(0);
+
+        DrawCall drawCall;
+        entity.mesh->FillDrawCall(drawCall);
+
+        drawCall.pass = 0;
+        drawCall.material = &_depthMaterial;
+        drawCall.modelMatrix = Matrix4x4::FromTransform(
+            entity.position, entity.rotation, Vector3(entity.scale));
+
+        _renderer.Submit(entity.sortKey, drawCall);
+    }
+
+    _renderer.Draw();
+
+    _directionalShadowMap.framebuffer.Stop();
 }
 
 void Application::Render()
 {
     glDepthMask(GL_TRUE);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
+    glEnable(GL_CULL_FACE);
+    
+    _renderer.SetProjectionMatrix(Matrix4x4::Perspective(65, 16.0f / 9.0f, 0.01f, 1000));
     _renderer.SetViewMatrix(_camera.GetViewMatrix());
     _renderer.SetEyePosition(_camera.GetPosition());
 
-    const Vector3 ambient(0.1f, 0.1f, 0.1f);
+    const Vector3 ambient(pow(0.1f, 1 / 2.2f));
 
 
     uint8_t pass;

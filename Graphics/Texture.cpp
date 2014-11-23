@@ -140,6 +140,34 @@ namespace Graphics
         delete buffer;
     }
 
+    void Texture::Create(uint32_t width, uint32_t height,
+        TextureFormat format, TextureLoadSettings& settings)
+    {
+        _width = width;
+        _height = height;
+
+        glGenTextures(1, &_textureId);
+        glBindTexture(GL_TEXTURE_2D, _textureId);
+
+        GLint externalFormat = (GLint)format;
+        if (format == TextureFormat::Depth16 ||
+            format == TextureFormat::Depth24 ||
+            format == TextureFormat::Depth32)
+        {
+            externalFormat = GL_DEPTH_COMPONENT;
+        }
+
+        glTexImage2D(GL_TEXTURE_2D, 0, (GLint)format,
+            _width, _height, 0, externalFormat, GL_FLOAT, nullptr);
+
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, settings.GetMinFilter());
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, settings.GetMagFilter());
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, (GLint)settings.clamp);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, (GLint)settings.clamp);
+
+        glBindTexture(GL_TEXTURE_2D, 0);
+    }
+
 
 
     void Texture::Bind()

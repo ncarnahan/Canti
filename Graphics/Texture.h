@@ -5,6 +5,17 @@
 
 namespace Graphics
 {
+    enum class TextureFormat
+    {
+        RGB = GL_RGB8,
+        RGBA = GL_RGBA8,
+        sRGB = GL_SRGB8,
+        sRGBA = GL_SRGB8_ALPHA8,
+        Depth16 = GL_DEPTH_COMPONENT16,
+        Depth24 = GL_DEPTH_COMPONENT24,
+        Depth32 = GL_DEPTH_COMPONENT32,
+    };
+
     enum class TextureFilter
     {
         Nearest,
@@ -14,7 +25,7 @@ namespace Graphics
     enum class TextureClamp
     {
         Repeat = GL_REPEAT,
-        Clamp = GL_CLAMP,
+        Clamp = GL_CLAMP_TO_EDGE,
     };
 
     struct TextureLoadSettings
@@ -27,7 +38,8 @@ namespace Graphics
         TextureLoadSettings() :
             useSrgbColorSpace(false),
             generateMipmaps(true),
-            filter(TextureFilter::Trilinear)
+            filter(TextureFilter::Trilinear),
+            clamp(TextureClamp::Repeat)
         {
         }
 
@@ -47,6 +59,8 @@ namespace Graphics
 
         bool Load(const char* fileName);
         bool Load(const char* fileName, TextureLoadSettings& settings);
+        void Create(uint32_t width, uint32_t height,
+            TextureFormat format, TextureLoadSettings& settings);
         void Bind();
 
         uint32_t GetWidth() { return _width; }

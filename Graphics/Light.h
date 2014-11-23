@@ -13,6 +13,8 @@ namespace Graphics
         Spot
     };
 
+    class ShadowMap;
+
     class Light
     {
     public:
@@ -25,6 +27,8 @@ namespace Graphics
         float radius;          //  PS
         float angle;           //   S
         float innerPercent;    //   S
+
+        ShadowMap* shadowMap;
 
         void Directional(Vector3 direction, Vector3 color, float intensity);
         void Point(Vector3 position, Vector3 color, float intensity, float radius);

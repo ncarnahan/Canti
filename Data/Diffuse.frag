@@ -18,8 +18,18 @@ struct Light
     int type;
 };
 uniform Light light;
+struct Shadow
+{
+    mat4 matrixPV;
+    float bias;
+    float strength;
+    sampler2D texture;
+    //samplerCubeShadow cubeMap;
+};
+uniform Shadow shadow;
 
 in vec3 v2f_position;
+in vec3 v2f_shadowPosition;
 in vec3 v2f_normal;
 in vec2 v2f_uv;
 
@@ -77,8 +87,15 @@ void main() {
         diffuse = light.intensity * light.color * NdotL * attenuation;
     }
 
+    float occluderDepth = texture(shadow.texture, v2f_shadowPosition.xy).r;
+    float shadowStrength = 0;
+    if (occluderDepth < v2f_shadowPosition.z - 0.0005) {
+        float l = smoothstep(0.9, 1.0, length(2 * v2f_shadowPosition.xy - vec2(1)));
+        shadowStrength = (1 - l) * 0.5;
+    }
+
     //Combine light components
-    vec3 lighting = diffuse + ambient;
+    vec3 lighting = diffuse * (1 - shadowStrength) + ambient;
 
     out_color = vec4(texColor * lighting, texAlpha);
 }

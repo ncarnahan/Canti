@@ -14,10 +14,11 @@ namespace Graphics
         glDeleteFramebuffers(1, &_fbo);
     }
 
-    void Framebuffer::Create(Texture* texture, int depthBits)
+    bool Framebuffer::Create(Texture& texture, int depthBits)
     {
-        _width = texture->GetWidth();
-        _height = texture->GetHeight();
+        _texture = &texture;
+        _width = texture.GetWidth();
+        _height = texture.GetHeight();
 
         //Create and bind
         glGenFramebuffers(1, &_fbo);
@@ -32,14 +33,37 @@ namespace Graphics
 
             glGenRenderbuffers(1, &_depthBuffer);
             glBindRenderbuffer(GL_RENDERBUFFER, _depthBuffer);
-            glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, texture->GetWidth(), texture->GetHeight());
+            glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, texture.GetWidth(), texture.GetHeight());
             glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, _depthBuffer);
         }
 
         //Point framebuffer to texture
-        glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, texture->GetID(), 0);
+        glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, texture.GetID(), 0);
         GLenum drawBuffers = GL_COLOR_ATTACHMENT0;
         glDrawBuffers(1, &drawBuffers);
+
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+        return (glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE);
+    }
+
+    bool Framebuffer::CreateDepth(Texture& texture)
+    {
+        _texture = &texture;
+        _width = texture.GetWidth();
+        _height = texture.GetHeight();
+
+        //Create and bind
+        glGenFramebuffers(1, &_fbo);
+        glBindFramebuffer(GL_FRAMEBUFFER, _fbo);
+        
+        //Point framebuffer to texture
+        glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, texture.GetID(), 0);
+        glDrawBuffer(GL_NONE);
+
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+        return (glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE);
     }
 
     void Framebuffer::Start()

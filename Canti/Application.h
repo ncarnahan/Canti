@@ -8,7 +8,7 @@
 #include <Graphics/StaticMesh.h>
 #include <Graphics/Light.h>
 #include <Graphics/Material.h>
-#include <Graphics/Framebuffer.h>
+#include <Graphics/ShadowMap.h>
 using namespace Graphics;
 #include <Utils/Input.h>
 using namespace Utils;
@@ -60,7 +60,10 @@ private:
     Texture _particleTexture;
     Material _particleMaterial;
 
-    Framebuffer _framebuffer;
+    Program _depthProgram;
+    Material _depthMaterial;
+    ShadowMap _directionalShadowMap;
+    Texture _directionalShadowTexture;
 
     std::vector<Entity> _entities;
     std::vector<Light> _lights;
@@ -77,6 +80,7 @@ public:
 
 private:
     void Simulate();
+    void RenderShadowMaps();
     void Render();
 };
 

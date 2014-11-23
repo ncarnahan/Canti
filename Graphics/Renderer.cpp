@@ -1,6 +1,7 @@
 #include "Renderer.h"
 #include "Material.h"
 #include "Light.h"
+#include "ShadowMap.h"
 #include <algorithm>
 
 namespace Graphics
@@ -18,6 +19,28 @@ namespace Graphics
         glUniform1f(program->GetUniformLocation("light.radius"), light->radius);
         glUniform1f(program->GetUniformLocation("light.cosAngle"), Math::CosDeg(light->angle));
         glUniform1f(program->GetUniformLocation("light.innerPercent"), light->innerPercent);
+    }
+
+    void UseShadowMap(Program* program, ShadowMap* shadowMap)
+    {
+        if (shadowMap == nullptr) { return; }
+
+        //Shadow map uniforms
+        glUniform1f(program->GetUniformLocation("shadow.bias"), shadowMap->bias);
+        glUniform1f(program->GetUniformLocation("shadow.strength"), shadowMap->strength);
+
+        const Matrix4x4 biasMatrix = Matrix4x4(
+            0.5f, 0, 0, 0.5f,
+            0, 0.5f, 0, 0.5f,
+            0, 0, 0.5f, 0.5f,
+            0, 0, 0, 1);
+        Matrix4x4 matrixPV = biasMatrix * shadowMap->matrixPV;
+        glUniformMatrix4fv(program->GetUniformLocation("shadow.matrixPV"), 1, GL_FALSE, &matrixPV[0]);
+
+        //Bind shadow map
+        glUniform1i(program->GetUniformLocation("shadow.texture"), 7);
+        glActiveTexture(GL_TEXTURE7);
+        shadowMap->framebuffer.GetTexture()->Bind();
     }
 
 
@@ -101,6 +124,7 @@ namespace Graphics
             if (drawCall.material->useLighting)
             {
                 UseLight(drawCall.material->GetProgram(), drawCall.light);
+                UseShadowMap(drawCall.material->GetProgram(), drawCall.light->shadowMap);
             }
 
 
