@@ -87,9 +87,11 @@ void main() {
         diffuse = light.intensity * light.color * NdotL * attenuation;
     }
 
+    float bias = 0.0005 * tan(acos(NdotL));
+    bias = clamp(bias, 0.0, 0.01);
     float occluderDepth = texture(shadow.texture, v2f_shadowPosition.xy).r;
     float shadowStrength = 0;
-    if (occluderDepth < v2f_shadowPosition.z - 0.002) {
+    if (occluderDepth < v2f_shadowPosition.z - bias) {
         float l = smoothstep(0.9, 1.0, length(2 * v2f_shadowPosition.xy - vec2(1)));
         shadowStrength = (1 - l) * 0.5;
     }
