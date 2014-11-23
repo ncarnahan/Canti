@@ -62,11 +62,11 @@ private:
 
     Program _depthProgram;
     Material _depthMaterial;
-    ShadowMap _directionalShadowMap;
-    Texture _directionalShadowTexture;
 
     std::vector<Entity> _entities;
     std::vector<Light> _lights;
+    std::vector<ShadowMap> _shadowMaps;
+    std::vector<Texture> _shadowMapTextures;
 
 
 public:

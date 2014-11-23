@@ -7,13 +7,18 @@ using namespace Math;
 
 namespace Graphics
 {
+    class Light;
+
     class ShadowMap
     {
     public:
         Framebuffer framebuffer;
-        Matrix4x4 matrixPV;
+        Matrix4x4 projMatrix;
+        Matrix4x4 viewMatrix;
         float bias;
         float strength;
+
+        void Init(Light& light);
     };
 }
 

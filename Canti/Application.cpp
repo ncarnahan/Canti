@@ -123,16 +123,6 @@ void Application::Init()
     _depthMaterial.SetProgram(_depthProgram);
     _depthMaterial.useLighting = false;
 
-    TextureLoadSettings depthMapSettings;
-    depthMapSettings.clamp = TextureClamp::Clamp;
-    depthMapSettings.filter = TextureFilter::Nearest;
-    _directionalShadowTexture.Create(1024, 1024,
-        TextureFormat::Depth24, depthMapSettings);
-
-    _directionalShadowMap.framebuffer.CreateDepth(_directionalShadowTexture);
-    _directionalShadowMap.bias = 0.0005f;
-    _directionalShadowMap.strength = 0.5f;
-
 
     {
         Entity entity;
@@ -164,8 +154,28 @@ void Application::Init()
             Quaternion::AngleAxis(30, Vector3::up);
         light.Directional(rotation, Vector3(1), 2);
         light.position = Vector3(0, 10, 0);
-        light.shadowMap = &_directionalShadowMap;
         _lights.push_back(light);
+    }
+
+    //Create shadow map textures and framebuffers
+    TextureLoadSettings depthMapSettings;
+    depthMapSettings.clamp = TextureClamp::Clamp;
+    depthMapSettings.filter = TextureFilter::Nearest;
+    for (size_t i = 0; i < _lights.size(); i++)
+    {
+        Light& light = _lights[i];
+
+        _shadowMapTextures.push_back(Texture());
+        _shadowMapTextures[i].Create(1024, 1024,
+            TextureFormat::Depth24, depthMapSettings);
+
+        _shadowMaps.push_back(ShadowMap());
+        _shadowMaps[i].Init(light);
+        _shadowMaps[i].framebuffer.CreateDepth(_shadowMapTextures[i]);
+        _shadowMaps[i].bias = 0.0005f;
+        _shadowMaps[i].strength = 0.5f;
+
+        _lights[i].shadowMap = &_shadowMaps[i];
     }
 
     glEnable(GL_DEPTH_TEST);
@@ -210,49 +220,56 @@ void Application::Simulate()
     _entities[1].position = Vector3(
         5 * sin((float)SDL_GetTicks() / 400.0f), 5,
         5 * cos((float)SDL_GetTicks() / 400.0f));
-    _lights[0].rotation = Quaternion::AngleAxis((float)SDL_GetTicks() / 20.0f, Vector3::up) *
+
+    //_lights[0].position = _camera.GetPosition() + _lights[0].rotation * Vector3::forward * -50;
+
+    _lights[0].rotation = Quaternion::AngleAxis(30, Vector3::up) *
         Quaternion::AngleAxis(-45, Vector3::right);
 }
 
 void Application::RenderShadowMaps()
 {
-    _directionalShadowMap.framebuffer.Start();
-
-    glDepthMask(GL_TRUE);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glDisable(GL_CULL_FACE);
-
-    Light& light = _lights[0];
-    light.position = Vector3(0, 10, 0);
-
-    Matrix4x4 projMatrix = Matrix4x4::Orthographic(-15, 15, -15, 15, -40, 40);
-    _renderer.SetProjectionMatrix(projMatrix);
-    Matrix4x4 viewMatrix = Matrix4x4::FromTransform(light.position, light.rotation, Vector3(1)).GetInverse();
-    _renderer.SetViewMatrix(viewMatrix);
-
-    _directionalShadowMap.matrixPV = projMatrix * viewMatrix;
-
-    for (auto& entity : _entities)
+    for (size_t i = 0; i < _lights.size(); ++i)
     {
-        //Update sort key depth
-        entity.sortKey.UpdateDepth(
-            Vector3::DistanceSqr(_camera.GetPosition(), entity.position));
-        entity.sortKey.UpdatePass(0);
+        Light& light = _lights[i];
+        if (light.shadowMap == nullptr) { continue; }
+        ShadowMap* shadowMap = light.shadowMap;
 
-        DrawCall drawCall;
-        entity.mesh->FillDrawCall(drawCall);
+        //Setup the light matrices
+        _renderer.SetProjectionMatrix(shadowMap->projMatrix);
+        shadowMap->viewMatrix = Matrix4x4::FromTransform(light.position, light.rotation, Vector3(1)).GetInverse();
+        _renderer.SetViewMatrix(shadowMap->viewMatrix);
 
-        drawCall.pass = 0;
-        drawCall.material = &_depthMaterial;
-        drawCall.modelMatrix = Matrix4x4::FromTransform(
-            entity.position, entity.rotation, Vector3(entity.scale));
+        for (auto& entity : _entities)
+        {
+            //Update sort key depth
+            entity.sortKey.UpdateDepth(
+                Vector3::DistanceSqr(_camera.GetPosition(), entity.position));
+            entity.sortKey.UpdatePass(0);
 
-        _renderer.Submit(entity.sortKey, drawCall);
+            DrawCall drawCall;
+            entity.mesh->FillDrawCall(drawCall);
+
+            //Inject the depth material
+            drawCall.material = &_depthMaterial;
+            drawCall.modelMatrix = Matrix4x4::FromTransform(
+                entity.position, entity.rotation, Vector3(entity.scale));
+            drawCall.pass = 0;
+
+            _renderer.Submit(entity.sortKey, drawCall);
+        }
+
+        //Submit the drawcalls to the GPU
+        shadowMap->framebuffer.Start();
+
+        glDepthMask(GL_TRUE);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glDisable(GL_CULL_FACE);
+
+        _renderer.Draw();
+
+        shadowMap->framebuffer.Stop();
     }
-
-    _renderer.Draw();
-
-    _directionalShadowMap.framebuffer.Stop();
 }
 
 void Application::Render()

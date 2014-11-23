@@ -40,7 +40,7 @@ namespace Graphics
                 0, 0.5f, 0, 0.5f,
                 0, 0, 0.5f, 0.5f,
                 0, 0, 0, 1);
-            Matrix4x4 matrixPV = biasMatrix * shadowMap->matrixPV;
+            Matrix4x4 matrixPV = biasMatrix * shadowMap->projMatrix * shadowMap->viewMatrix;
             glUniformMatrix4fv(program->GetUniformLocation("shadow.matrixPV"), 1, GL_FALSE, &matrixPV[0]);
 
             //Bind shadow map
