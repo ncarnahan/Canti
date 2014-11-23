@@ -24,24 +24,30 @@ namespace Graphics
 
     void UseShadowMap(Program* program, ShadowMap* shadowMap)
     {
-        if (shadowMap == nullptr) { return; }
+        if (shadowMap == nullptr)
+        {
+            //No shadows; set strength to 0
+            glUniform1f(program->GetUniformLocation("shadow.strength"), 0);
+        }
+        else
+        {
+            //Shadow map uniforms
+            glUniform1f(program->GetUniformLocation("shadow.bias"), shadowMap->bias);
+            glUniform1f(program->GetUniformLocation("shadow.strength"), shadowMap->strength);
 
-        //Shadow map uniforms
-        glUniform1f(program->GetUniformLocation("shadow.bias"), shadowMap->bias);
-        glUniform1f(program->GetUniformLocation("shadow.strength"), shadowMap->strength);
+            const Matrix4x4 biasMatrix = Matrix4x4(
+                0.5f, 0, 0, 0.5f,
+                0, 0.5f, 0, 0.5f,
+                0, 0, 0.5f, 0.5f,
+                0, 0, 0, 1);
+            Matrix4x4 matrixPV = biasMatrix * shadowMap->matrixPV;
+            glUniformMatrix4fv(program->GetUniformLocation("shadow.matrixPV"), 1, GL_FALSE, &matrixPV[0]);
 
-        const Matrix4x4 biasMatrix = Matrix4x4(
-            0.5f, 0, 0, 0.5f,
-            0, 0.5f, 0, 0.5f,
-            0, 0, 0.5f, 0.5f,
-            0, 0, 0, 1);
-        Matrix4x4 matrixPV = biasMatrix * shadowMap->matrixPV;
-        glUniformMatrix4fv(program->GetUniformLocation("shadow.matrixPV"), 1, GL_FALSE, &matrixPV[0]);
-
-        //Bind shadow map
-        glUniform1i(program->GetUniformLocation("shadow.texture"), 7);
-        glActiveTexture(GL_TEXTURE7);
-        shadowMap->framebuffer.GetTexture()->Bind();
+            //Bind shadow map
+            glUniform1i(program->GetUniformLocation("shadow.texture"), 7);
+            glActiveTexture(GL_TEXTURE7);
+            shadowMap->framebuffer.GetTexture()->Bind();
+        }
     }
 
 

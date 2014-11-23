@@ -87,13 +87,18 @@ void main() {
         diffuse = light.intensity * light.color * NdotL * attenuation;
     }
 
-    float bias = shadow.bias * tan(acos(NdotL));
-    bias = clamp(bias, 0.0002, 0.01);
-    float occluderDepth = texture(shadow.texture, v2f_shadowPosition.xy).r;
     float shadowStrength = 0;
-    if (occluderDepth < v2f_shadowPosition.z - bias) {
-        float l = smoothstep(0.9, 1.0, length(2 * v2f_shadowPosition.xy - vec2(1)));
-        shadowStrength = (1 - l) * shadow.strength;
+    if (shadow.strength > 0) {
+        //Adjust bias by slope
+        float bias = shadow.bias * tan(acos(NdotL));
+        bias = clamp(bias, 0.0002, 0.01);
+        
+        float occluderDepth = texture(shadow.texture, v2f_shadowPosition.xy).r;
+        if (occluderDepth < v2f_shadowPosition.z - bias) {
+            //Fade at the edges of the shadowmap
+            float l = smoothstep(0.9, 1.0, length(2 * v2f_shadowPosition.xy - vec2(1)));
+            shadowStrength = (1 - l) * shadow.strength;
+        }
     }
 
     //Combine light components
