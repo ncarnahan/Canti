@@ -12,7 +12,8 @@ namespace Graphics
         glUniform1i(program->GetUniformLocation("light.type"), (int)light->type);
 
         glUniform3fv(program->GetUniformLocation("light.position"), 1, &light->position[0]);
-        glUniform3fv(program->GetUniformLocation("light.direction"), 1, &light->direction[0]);
+        Vector3 direction = light->rotation * Vector3::back;
+        glUniform3fv(program->GetUniformLocation("light.direction"), 1, &direction[0]);
         glUniform3fv(program->GetUniformLocation("light.color"), 1, &light->color[0]);
             
         glUniform1f(program->GetUniformLocation("light.intensity"), light->intensity);

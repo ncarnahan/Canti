@@ -89,7 +89,7 @@ void main() {
 
     float occluderDepth = texture(shadow.texture, v2f_shadowPosition.xy).r;
     float shadowStrength = 0;
-    if (occluderDepth < v2f_shadowPosition.z - 0.0005) {
+    if (occluderDepth < v2f_shadowPosition.z - 0.002) {
         float l = smoothstep(0.9, 1.0, length(2 * v2f_shadowPosition.xy - vec2(1)));
         shadowStrength = (1 - l) * 0.5;
     }

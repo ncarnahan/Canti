@@ -160,7 +160,9 @@ void Application::Init()
 
     {
         Light light;
-        light.Directional(Vector3(0, 1, 0), Vector3(1), 2);
+        auto rotation = Quaternion::AngleAxis(-80, Vector3::right) *
+            Quaternion::AngleAxis(30, Vector3::up);
+        light.Directional(rotation, Vector3(1), 2);
         light.position = Vector3(0, 10, 0);
         light.shadowMap = &_directionalShadowMap;
         _lights.push_back(light);

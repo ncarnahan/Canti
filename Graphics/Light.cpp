@@ -2,11 +2,11 @@
 
 namespace Graphics
 {
-    void Light::Directional(Vector3 direction, Vector3 color, float intensity)
+    void Light::Directional(Quaternion rotation, Vector3 color, float intensity)
     {
         this->type = LightType::Directional;
 
-        this->direction = direction;
+        this->rotation = rotation;
         this->color = color;
         this->intensity = intensity;
     }
@@ -21,13 +21,13 @@ namespace Graphics
         this->radius = radius;
     }
 
-    void Light::Spot(Vector3 position, Vector3 direction, Vector3 color,
+    void Light::Spot(Vector3 position, Quaternion rotation, Vector3 color,
         float intensity, float radius, float angle, float innerPercent)
     {
         this->type = LightType::Spot;
 
         this->position = position;
-        this->direction = direction;
+        this->rotation = rotation;
         this->color = color;
         this->intensity = intensity;
         this->radius = radius;
