@@ -19,6 +19,7 @@ namespace Graphics
     enum class TextureFilter
     {
         Nearest,
+        Bilinear,
         Trilinear,
     };
 

@@ -12,6 +12,8 @@ namespace Graphics
         {
         case TextureFilter::Nearest:
             return generateMipmaps ? GL_NEAREST : GL_NEAREST_MIPMAP_LINEAR;
+        case TextureFilter::Bilinear:
+            return generateMipmaps ? GL_LINEAR : GL_LINEAR_MIPMAP_NEAREST;
         case TextureFilter::Trilinear:
             return generateMipmaps ? GL_LINEAR : GL_LINEAR_MIPMAP_LINEAR;
         default:
@@ -25,6 +27,7 @@ namespace Graphics
         {
         case TextureFilter::Nearest:
             return GL_NEAREST;
+        case TextureFilter::Bilinear:
         case TextureFilter::Trilinear:
             return GL_LINEAR;
         default:
