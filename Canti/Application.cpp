@@ -150,10 +150,15 @@ void Application::Init()
 
     {
         Light light;
-        auto rotation = Quaternion::AngleAxis(-80, Vector3::right) *
-            Quaternion::AngleAxis(30, Vector3::up);
-        light.Directional(rotation, Vector3(1), 2);
+        light.Directional(Quaternion(), Vector3(1), 2);
         light.position = Vector3(0, 10, 0);
+        _lights.push_back(light);
+    }
+
+    {
+        Light light;
+        auto rotation = Quaternion();
+        light.Spot(Vector3(2.5f, 2, 0), rotation, Vector3(1, 0, 0), 2, 10, 60, 1);
         _lights.push_back(light);
     }
 
@@ -161,19 +166,20 @@ void Application::Init()
     TextureLoadSettings depthMapSettings;
     depthMapSettings.clamp = TextureClamp::Clamp;
     depthMapSettings.filter = TextureFilter::Nearest;
+
+    _shadowMaps.resize(_lights.size());
+    _shadowMapTextures.resize(_lights.size());
     for (size_t i = 0; i < _lights.size(); i++)
     {
         Light& light = _lights[i];
 
-        _shadowMapTextures.push_back(Texture());
         _shadowMapTextures[i].Create(1024, 1024,
             TextureFormat::Depth24, depthMapSettings);
 
-        _shadowMaps.push_back(ShadowMap());
         _shadowMaps[i].Init(light);
         _shadowMaps[i].framebuffer.CreateDepth(_shadowMapTextures[i]);
         _shadowMaps[i].bias = 0.0005f;
-        _shadowMaps[i].strength = 0.5f;
+        _shadowMaps[i].strength = 1;
 
         _lights[i].shadowMap = &_shadowMaps[i];
     }

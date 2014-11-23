@@ -45,7 +45,7 @@ void main() {
     float attenuation = 1;
 
     if (light.type == 0) {
-        lightDir = normalize(light.direction);
+        lightDir = normalize(-light.direction);
     }
     else {
         lightDir = light.position - v2f_position;

@@ -29,7 +29,7 @@ struct Shadow
 uniform Shadow shadow;
 
 in vec3 v2f_position;
-in vec3 v2f_shadowPosition;
+in vec4 v2f_shadowPosition;
 in vec3 v2f_normal;
 in vec2 v2f_uv;
 
@@ -48,7 +48,7 @@ void main() {
     float attenuation = 1;
 
     if (light.type == 0) {
-        lightDir = normalize(light.direction);
+        lightDir = normalize(-light.direction);
     }
     else {
         lightDir = light.position - v2f_position;
@@ -93,10 +93,14 @@ void main() {
         float bias = shadow.bias * tan(acos(NdotL));
         bias = clamp(bias, 0.0002, 0.01);
         
-        float occluderDepth = texture(shadow.texture, v2f_shadowPosition.xy).r;
-        if (occluderDepth < v2f_shadowPosition.z - bias) {
-            //Fade at the edges of the shadowmap
-            float l = smoothstep(0.9, 1.0, length(2 * v2f_shadowPosition.xy - vec2(1)));
+        vec2 samplePosition = v2f_shadowPosition.xy / v2f_shadowPosition.w;
+        float occluderDepth = texture(shadow.texture, samplePosition).r;
+        if (occluderDepth < (v2f_shadowPosition.z - bias) / v2f_shadowPosition.w) {
+            float l = 0;
+            //Fade out directional light at the edges of the shadowmap
+            if (light.type == 0) {
+                l = smoothstep(0.9, 1.0, length(2 * samplePosition - vec2(1)));
+            }
             shadowStrength = (1 - l) * shadow.strength;
         }
     }
