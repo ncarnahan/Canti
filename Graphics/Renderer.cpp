@@ -18,7 +18,7 @@ namespace Graphics
             
         glUniform1f(program->GetUniformLocation("light.intensity"), light->intensity);
         glUniform1f(program->GetUniformLocation("light.radius"), light->radius);
-        glUniform1f(program->GetUniformLocation("light.cosAngle"), Math::CosDeg(light->angle));
+        glUniform1f(program->GetUniformLocation("light.cosAngle"), Math::CosDeg(light->angle / 2));
         glUniform1f(program->GetUniformLocation("light.innerPercent"), light->innerPercent);
     }
 

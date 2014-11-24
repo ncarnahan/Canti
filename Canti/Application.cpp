@@ -158,7 +158,7 @@ void Application::Init()
     {
         Light light;
         auto rotation = Quaternion();
-        light.Spot(Vector3(2.5f, 2, 0), rotation, Vector3(1, 0, 0), 2, 10, 60, 1);
+        light.Spot(Vector3(2.5f, 2, 0), rotation, Vector3(1, 0, 0), 2, 10, 90, 1);
         _lights.push_back(light);
     }
 
@@ -231,6 +231,7 @@ void Application::Simulate()
 
     _lights[0].rotation = Quaternion::AngleAxis(30, Vector3::up) *
         Quaternion::AngleAxis(-45, Vector3::right);
+    _lights[1].rotation = Quaternion::AngleAxis((float)SDL_GetTicks() / 30.0f, Vector3::up);
 }
 
 void Application::RenderShadowMaps()
