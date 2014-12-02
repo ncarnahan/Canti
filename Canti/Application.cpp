@@ -208,6 +208,15 @@ void Application::Update()
     if (_input.KeyPressed(SDL_SCANCODE_SPACE)) { _updateScene = !_updateScene; }
     if (_input.KeyPressed(SDL_SCANCODE_T)) { _showTangents = !_showTangents; }
     if (_input.KeyPressed(SDL_SCANCODE_R)) { _renderer.sortEnabled = !_renderer.sortEnabled; }
+    if (_input.KeyPressed(SDL_SCANCODE_F))
+    {
+        //Toggle shadow maps
+        for (size_t i = 0; i < _lights.size(); i++)
+        {
+            if (_lights[i].shadowMap == nullptr) { _lights[i].shadowMap = &_shadowMaps[i]; }
+            else { _lights[i].shadowMap = nullptr; }
+        }
+    }
     if (_input.KeyPressed(SDL_SCANCODE_MINUS)) { _renderer.ignoreCount++; }
     if (_input.KeyPressed(SDL_SCANCODE_EQUALS)) { _renderer.ignoreCount = Math::Max(_renderer.ignoreCount - 1, 0); }
     std::cout << "Ignoring: " << _renderer.ignoreCount << std::endl;
