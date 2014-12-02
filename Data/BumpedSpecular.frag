@@ -20,6 +20,14 @@ struct Light
     int type;
 };
 uniform Light light;
+struct Shadow
+{
+    mat4 matrixPV;
+    float bias;
+    float strength;
+    sampler2D texture;
+};
+uniform Shadow shadow;
 
 struct Material
 {
@@ -29,6 +37,7 @@ struct Material
 uniform Material material;
 
 in vec3 v2f_position;
+in vec4 v2f_shadowPosition;
 in vec3 v2f_normal;
 in vec3 v2f_tangent;
 in vec3 v2f_bitangent;
@@ -117,8 +126,26 @@ void main() {
         }
     }
 
+    float shadowStrength = 0;
+    if (shadow.strength > 0) {
+        //Adjust bias by slope
+        float bias = shadow.bias * tan(acos(NdotL));
+        bias = clamp(bias, 0.0002, 0.01);
+        
+        vec2 samplePosition = v2f_shadowPosition.xy / v2f_shadowPosition.w;
+        float occluderDepth = texture(shadow.texture, samplePosition).r;
+        if (occluderDepth < (v2f_shadowPosition.z - bias) / v2f_shadowPosition.w) {
+            float l = 0;
+            //Fade out directional light at the edges of the shadowmap
+            if (light.type == 0) {
+                l = smoothstep(0.9, 1.0, length(2 * samplePosition - vec2(1)));
+            }
+            shadowStrength = (1 - l) * shadow.strength;
+        }
+    }
+
     //Combine light components
-    vec3 lighting = diffuse + specular + ambient;
+    vec3 lighting = (diffuse + specular) * (1 - shadowStrength) + ambient;
 
     out_color = vec4(texColor * lighting, 1);
 }

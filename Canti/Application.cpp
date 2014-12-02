@@ -127,7 +127,7 @@ void Application::Init()
     {
         Entity entity;
         entity.mesh = &_roomMesh;
-        entity.material = &_tileMaterial1;
+        entity.material = &_tileMaterial4;
         entity.position = Vector3(0, 0, 0);
         _entities.push_back(entity);
     }
@@ -135,7 +135,7 @@ void Application::Init()
     {
         Entity entity;
         entity.mesh = &_cubeMesh;
-        entity.material = &_tileMaterial1;
+        entity.material = &_tileMaterial4;
         entity.position = Vector3(0, 4, 0);
         _entities.push_back(entity);
     }

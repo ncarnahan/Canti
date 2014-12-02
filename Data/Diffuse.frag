@@ -24,7 +24,6 @@ struct Shadow
     float bias;
     float strength;
     sampler2D texture;
-    //samplerCubeShadow cubeMap;
 };
 uniform Shadow shadow;
 
