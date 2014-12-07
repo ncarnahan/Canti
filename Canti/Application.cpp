@@ -175,9 +175,8 @@ void Application::Init()
 
         _shadowMapTextures[i].Create(1024, 1024,
             TextureFormat::Depth24, depthMapSettings);
-
-        _shadowMaps[i].Init(light);
-        _shadowMaps[i].framebuffer.CreateDepth(_shadowMapTextures[i]);
+        
+        _shadowMaps[i].Init(light, _shadowMapTextures[i]);
         _shadowMaps[i].bias = 0.0005f;
         _shadowMaps[i].strength = 1;
 

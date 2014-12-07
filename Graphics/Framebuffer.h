@@ -7,6 +7,28 @@ namespace Graphics
 {
     class Texture;
 
+    enum class RenderTargetType
+    {
+        Renderbuffer,
+        Framebuffer,
+    };
+
+    enum class RenderTargetAttachment
+    {
+        DepthAttachment = GL_DEPTH_ATTACHMENT,
+        ColorAttachment0 = GL_COLOR_ATTACHMENT0,
+        ColorAttachment1 = GL_COLOR_ATTACHMENT1,
+        ColorAttachment2 = GL_COLOR_ATTACHMENT2,
+        ColorAttachment3 = GL_COLOR_ATTACHMENT3,
+    };
+
+    struct RenderTarget
+    {
+        RenderTargetType type;
+        RenderTargetAttachment attachment;
+        Texture* texture;   //Valid if type == Framebuffer
+    };
+
     class Framebuffer
     {
     private:
@@ -14,18 +36,16 @@ namespace Graphics
         GLuint _depthBuffer;
         uint32_t _width, _height;
         GLint _savedViewport[4];
-        Texture* _texture;
 
     public:
         Framebuffer();
         ~Framebuffer();
 
-        bool Create(Texture& texture, int depthBits);
+        bool Framebuffer::Create(uint32_t width, uint32_t height,
+            RenderTarget* target, int count);
         bool CreateDepth(Texture& texture);
         void Start();
         void Stop();
-
-        Texture* GetTexture() { return _texture; }
     };
 }
 

@@ -13,12 +13,17 @@ namespace Graphics
     {
     public:
         Framebuffer framebuffer;
+        Texture* texture;
         Matrix4x4 projMatrix;
         Matrix4x4 viewMatrix;
         float bias;
         float strength;
 
-        void Init(Light& light);
+        ShadowMap() : strength(1)
+        {
+        }
+        
+        void Init(Light& light, Texture& texture);
     };
 }
 

@@ -46,7 +46,7 @@ namespace Graphics
             //Bind shadow map
             glUniform1i(program->GetUniformLocation("shadow.texture"), 7);
             glActiveTexture(GL_TEXTURE7);
-            shadowMap->framebuffer.GetTexture()->Bind();
+            shadowMap->texture->Bind();
         }
     }
 

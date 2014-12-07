@@ -3,7 +3,7 @@
 
 namespace Graphics
 {
-    void ShadowMap::Init(Light& light)
+    void ShadowMap::Init(Light& light, Texture& texture)
     {
         switch (light.type)
         {
@@ -20,5 +20,8 @@ namespace Graphics
         default:
             break;
         }
+
+        framebuffer.CreateDepth(texture);
+        this->texture = &texture;
     }
 }
