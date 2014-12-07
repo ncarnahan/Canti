@@ -51,6 +51,8 @@ void Application::Init()
     _camera.SetWindow(_window);
     _camera.SetPosition(Vector3(0, 2, 0));
 
+    _gbuffer.Create(1280, 720);
+
     _diffuseProgram.LoadFromFiles("Data/Diffuse.vert", "Data/Diffuse.frag");
     _specularProgram.LoadFromFiles("Data/Specular.vert", "Data/Specular.frag");
     _bumpedDiffuseProgram.LoadFromFiles("Data/BumpedDiffuse.vert", "Data/BumpedDiffuse.frag");

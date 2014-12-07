@@ -14,6 +14,7 @@ using namespace Graphics;
 using namespace Utils;
 #include "FpsCamera.h"
 #include "Entity.h"
+#include "GBuffer.h"
 
 class Application
 {
@@ -24,6 +25,7 @@ private:
 
     bool _updateScene;
 
+    GBuffer _gbuffer;
     Renderer _renderer;
     Input _input;
     FpsCamera _camera;

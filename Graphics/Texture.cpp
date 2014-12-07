@@ -143,6 +143,25 @@ namespace Graphics
         delete buffer;
     }
 
+    GLint GetExternalFormat(TextureFormat format)
+    {
+        switch (format)
+        {
+        case TextureFormat::RGB:
+        case TextureFormat::sRGB:
+            return GL_RGB;
+        case TextureFormat::RGBA:
+        case TextureFormat::sRGBA:
+            return GL_RGBA;
+        case TextureFormat::Depth16:
+        case TextureFormat::Depth24:
+        case TextureFormat::Depth32:
+            return GL_DEPTH_COMPONENT;
+        default:
+            return 0;
+        }
+    }
+
     void Texture::Create(uint32_t width, uint32_t height,
         TextureFormat format, TextureLoadSettings& settings)
     {
@@ -151,17 +170,9 @@ namespace Graphics
 
         glGenTextures(1, &_textureId);
         glBindTexture(GL_TEXTURE_2D, _textureId);
-
-        GLint externalFormat = (GLint)format;
-        if (format == TextureFormat::Depth16 ||
-            format == TextureFormat::Depth24 ||
-            format == TextureFormat::Depth32)
-        {
-            externalFormat = GL_DEPTH_COMPONENT;
-        }
-
+        
         glTexImage2D(GL_TEXTURE_2D, 0, (GLint)format,
-            _width, _height, 0, externalFormat, GL_FLOAT, nullptr);
+            _width, _height, 0, GetExternalFormat(format), GL_FLOAT, nullptr);
 
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, settings.GetMinFilter());
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, settings.GetMagFilter());
