@@ -3,6 +3,8 @@
 #include <SDL_image.h>
 #include <Graphics/OpenGL.h>
 
+const Vector3 ambient(pow(0.1f, 1 / 2.2f));
+
 void ConstructQuadMesh(StaticMesh& mesh)
 {
     Vertex tempVertex;
@@ -391,6 +393,17 @@ void Application::RenderDeferred()
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glEnable(GL_CULL_FACE);
 
+    Light ambientLight;
+    ambientLight.Ambient(ambient);
+    DrawCall drawCall;
+    _quad.FillDrawCall(drawCall);
+    drawCall.material = &_deferredLightMaterial;
+    drawCall.modelMatrix = Matrix4x4();
+    drawCall.light = &ambientLight;
+    drawCall.pass = 1;  //Additive
+
+    _renderer.Submit(SortKey(), drawCall);
+
     for (Light& light : _lights)
     {
         DrawCall drawCall;
@@ -415,9 +428,7 @@ void Application::RenderForward()
     _renderer.SetViewMatrix(_camera.GetViewMatrix());
     _renderer.SetEyePosition(_camera.GetPosition());
 
-    const Vector3 ambient(pow(0.1f, 1 / 2.2f));
-
-
+    
     uint8_t pass;
     Vector3 drawCallAmbient;
 

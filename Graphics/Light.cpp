@@ -34,4 +34,10 @@ namespace Graphics
         this->angle = angle;
         this->innerPercent = innerPercent;
     }
+
+    void Light::Ambient(Vector3 color)
+    {
+        this->type = LightType::Ambient;
+        this->color = color;
+    }
 }

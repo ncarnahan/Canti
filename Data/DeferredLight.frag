@@ -56,32 +56,38 @@ void main() {
     //Light components
     vec3 ambient = pow(light.ambient, vec3(2.2));
     vec3 diffuse = vec3(0);
-    float NdotL = dot(normalDir, lightDir);
 
-    if (NdotL > 0) {
-        //Calculate attenuation
-        if (light.type > 0) {
-            //Attenuate to 0 at the radius
-            float dr = lightDistance / light.radius;
-            float denom = max(1 + dr, 0.001);
-            attenuation = max(1 / (denom * denom), 0);
-            attenuation *= 1 - smoothstep(0, 1, dr);
+    if (light.type == 3) {  //Ambient light; deferred shading only
+        ambient = pow(light.color, vec3(2.2));
+    }
+    else {
+        float NdotL = dot(normalDir, lightDir);
 
-            if (light.type == 2) {
-                float multiplier = 0;
-                float spotEffect = dot(lightDir, -light.direction);
+        if (NdotL > 0) {
+            //Calculate attenuation
+            if (light.type > 0) {
+                //Attenuate to 0 at the radius
+                float dr = lightDistance / light.radius;
+                float denom = max(1 + dr, 0.001);
+                attenuation = max(1 / (denom * denom), 0);
+                attenuation *= 1 - smoothstep(0, 1, dr);
 
-                if (spotEffect > light.cosAngle) {
-                    float zeroToOne = max((spotEffect - light.cosAngle) / (1 - light.cosAngle), 0);
-                    multiplier = smoothstep(0, 1, zeroToOne / max(1 - light.innerPercent, 0.001));
+                if (light.type == 2) {
+                    float multiplier = 0;
+                    float spotEffect = dot(lightDir, -light.direction);
+
+                    if (spotEffect > light.cosAngle) {
+                        float zeroToOne = max((spotEffect - light.cosAngle) / (1 - light.cosAngle), 0);
+                        multiplier = smoothstep(0, 1, zeroToOne / max(1 - light.innerPercent, 0.001));
+                    }
+
+                    attenuation *= multiplier;
                 }
-
-                attenuation *= multiplier;
             }
-        }
 
-        //Compute diffuse
-        diffuse = light.intensity * light.color * NdotL * attenuation;
+            //Compute diffuse
+            diffuse = light.intensity * light.color * NdotL * attenuation;
+        }
     }
 
     //Combine light components

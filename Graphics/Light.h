@@ -11,7 +11,8 @@ namespace Graphics
     {
         Directional,
         Point,
-        Spot
+        Spot,
+        Ambient,    //Only used for deferred shading
     };
 
     class ShadowMap;
@@ -35,6 +36,7 @@ namespace Graphics
         void Point(Vector3 position, Vector3 color, float intensity, float radius);
         void Spot(Vector3 position, Quaternion rotation, Vector3 color,
             float intensity, float radius, float angle, float innerPercent);
+        void Ambient(Vector3 color);
     };
 }
 
