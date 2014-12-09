@@ -244,12 +244,9 @@ void Application::Init()
         
         _shadowMaps[i].Init(light, _shadowMapTextures[i]);
         _shadowMaps[i].bias = 0.0005f;
-        _shadowMaps[i].strength = 1;
+        _shadowMaps[i].strength = (_lights[i].type != LightType::Point) ? 1 : 0;
 
-        if (_lights[i].type != LightType::Point)
-        {
-            _lights[i].shadowMap = &_shadowMaps[i];
-        }
+        _lights[i].shadowMap = &_shadowMaps[i];
     }
 
     glEnable(GL_DEPTH_TEST);
