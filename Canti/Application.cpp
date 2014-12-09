@@ -3,7 +3,7 @@
 #include <SDL_image.h>
 #include <Graphics/OpenGL.h>
 
-const Vector3 ambient(pow(0.1f, 1 / 2.2f));
+const Vector3 ambient(0.1f);
 
 void ConstructQuadMesh(StaticMesh& mesh)
 {

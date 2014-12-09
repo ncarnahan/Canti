@@ -63,12 +63,12 @@ void main() {
     }
 
     //Light components
-    vec3 ambient = pow(light.ambient, vec3(2.2));
+    vec3 ambient = light.ambient;
     vec3 diffuse = vec3(0);
     float shadowStrength = 0;
 
     if (light.type == 3) {  //Ambient light; deferred shading only
-        ambient = pow(light.color, vec3(2.2));
+        ambient = light.color;
     }
     else {
         float NdotL = dot(normalDir, lightDir);

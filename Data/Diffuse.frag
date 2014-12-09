@@ -56,7 +56,6 @@ void main() {
     }
 
     //Light components
-    vec3 ambient = pow(light.ambient, vec3(2.2));
     vec3 diffuse = vec3(0);
     float NdotL = dot(normalDir, lightDir);
 
@@ -105,7 +104,7 @@ void main() {
     }
 
     //Combine light components
-    vec3 lighting = diffuse * (1 - shadowStrength) + ambient;
+    vec3 lighting = diffuse * (1 - shadowStrength) + light.ambient;
 
     out_color = vec4(texColor * lighting, texAlpha);
 }
