@@ -70,7 +70,11 @@ private:
     Program _deferredLightProgram;
     Material _deferredLightMaterial;
     Program _deferredDiffuseProgram;
+    Program _deferredBumpedDiffuseProgram;
     Material _deferredTileMaterial1;
+    Material _deferredTileMaterial2;
+    Material _deferredTileMaterial3;
+    Material _deferredTileMaterial4;
 
     std::vector<Entity> _entities;
     std::vector<Light> _lights;
