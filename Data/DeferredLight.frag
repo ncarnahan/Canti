@@ -21,6 +21,14 @@ struct Light
     int type;
 };
 uniform Light light;
+struct Shadow
+{
+    mat4 matrixPV;
+    float bias;
+    float strength;
+    sampler2D texture;
+};
+uniform Shadow shadow;
 
 in vec2 v2f_uv;
 in mat4 v2f_matrixInvPV;
@@ -37,6 +45,7 @@ vec3 reconstructWorldPosition() {
 }
 
 void main() {
+    vec3 worldPosition = reconstructWorldPosition();
     vec3 texColor = texture(tex_color, v2f_uv).rgb;
     vec3 normalDir = texture(tex_normal, v2f_uv).rgb * 2 - vec3(1);
 
@@ -48,7 +57,7 @@ void main() {
         lightDir = normalize(-light.direction);
     }
     else {
-        lightDir = light.position - reconstructWorldPosition();
+        lightDir = light.position - worldPosition;
         lightDistance = length(lightDir);
         lightDir = lightDir / lightDistance;    //normalize
     }
@@ -56,6 +65,7 @@ void main() {
     //Light components
     vec3 ambient = pow(light.ambient, vec3(2.2));
     vec3 diffuse = vec3(0);
+    float shadowStrength = 0;
 
     if (light.type == 3) {  //Ambient light; deferred shading only
         ambient = pow(light.color, vec3(2.2));
@@ -88,12 +98,29 @@ void main() {
             //Compute diffuse
             diffuse = light.intensity * light.color * NdotL * attenuation;
         }
+
+        if (shadow.strength > 0) {
+            //Adjust bias by slope
+            float bias = shadow.bias * tan(acos(NdotL));
+            bias = clamp(bias, 0.0002, 0.01);
+            
+            vec4 shadowPosition = shadow.matrixPV * vec4(worldPosition, 1);
+            vec2 samplePosition = shadowPosition.xy / shadowPosition.w;
+            float occluderDepth = texture(shadow.texture, samplePosition).r;
+            if (occluderDepth < (shadowPosition.z - bias) / shadowPosition.w) {
+                float l = 0;
+                //Fade out directional light at the edges of the shadowmap
+                if (light.type == 0) {
+                    l = smoothstep(0.9, 1.0, length(2 * samplePosition - vec2(1)));
+                }
+                shadowStrength = (1 - l) * shadow.strength;
+            }
+        }
     }
 
     //Combine light components
-    vec3 lighting = diffuse + ambient;
+    vec3 lighting = diffuse * (1 - shadowStrength) + ambient;
 
     out_color = texColor * lighting;
-    //out_color = /* abs */(reconstructWorldPosition());
     // out_color = abs(texture(tex_normal, v2f_uv).rgb * 2 - vec3(1));
 }
