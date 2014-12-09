@@ -3,9 +3,43 @@
 #include <SDL_image.h>
 #include <Graphics/OpenGL.h>
 
+void ConstructQuadMesh(StaticMesh& mesh)
+{
+    Vertex tempVertex;
+    std::vector<Vertex> quadVertices;
+
+    tempVertex.position = Vector3(-1, -1, 0);
+    tempVertex.uv = Vector2(0, 0);
+    quadVertices.push_back(tempVertex);
+
+    tempVertex.position = Vector3(-1, 1, 0);
+    tempVertex.uv = Vector2(0, 1);
+    quadVertices.push_back(tempVertex);
+
+    tempVertex.position = Vector3(1, -1, 0);
+    tempVertex.uv = Vector2(1, 0);
+    quadVertices.push_back(tempVertex);
+
+    tempVertex.position = Vector3(1, 1, 0);
+    tempVertex.uv = Vector2(1, 1);
+    quadVertices.push_back(tempVertex);
+    
+    std::vector<GLuint> quadIndices;
+    quadIndices.push_back(0);
+    quadIndices.push_back(2);
+    quadIndices.push_back(1);
+
+    quadIndices.push_back(1);
+    quadIndices.push_back(2);
+    quadIndices.push_back(3);
+
+    mesh.BufferData(quadVertices, quadIndices);
+}
+
 Application::Application() :
     _running(true),
     _updateScene(true),
+    _useDeferredShading(true),
     _showTangents(false)
 {
     //Initialize SDL
@@ -60,6 +94,9 @@ void Application::Init()
     _cutoutProgram.LoadFromFiles("Data/CutoutDiffuse.vert", "Data/CutoutDiffuse.frag");
     _additiveProgram.LoadFromFiles("Data/Additive.vert", "Data/Additive.frag");
     _tangentProgram.LoadFromFiles("Data/TangentVisualization.vert", "Data/TangentVisualization.geom", "Data/TangentVisualization.frag");
+    
+    _deferredLightProgram.LoadFromFiles("Data/DeferredLight.vert", "Data/DeferredLight.frag");
+    _deferredDiffuseProgram.LoadFromFiles("Data/DeferredDiffuse.vert", "Data/DeferredDiffuse.frag");
     
     _roomMesh.LoadObjFile("Data/Room.obj");
     _cubeMesh.LoadObjFile("Data/Cube.obj");
@@ -117,6 +154,16 @@ void Application::Init()
     _particleMaterial.blendType = BlendType::Additive;
     _particleMaterial.useLighting = false;
     _particleMaterial.SetTexture("tex_diffuse", _particleTexture);
+
+    _deferredLightMaterial.SetProgram(_deferredLightProgram);
+    _deferredLightMaterial.SetTexture("tex_color", _gbuffer.colorTexture);
+    _deferredLightMaterial.SetTexture("tex_normal", _gbuffer.normalTexture);
+    _deferredLightMaterial.SetTexture("tex_depth", _gbuffer.depthTexture);
+    _deferredLightMaterial.useLighting = false;
+
+    _deferredTileMaterial1.SetProgram(_deferredDiffuseProgram);
+    _deferredTileMaterial1.SetTexture("tex_diffuse", _tileTexture);
+    _deferredTileMaterial1.useLighting = false;
     
 
     
@@ -125,11 +172,14 @@ void Application::Init()
     _depthMaterial.SetProgram(_depthProgram);
     _depthMaterial.useLighting = false;
 
+    ConstructQuadMesh(_quad);
+
 
     {
         Entity entity;
         entity.mesh = &_roomMesh;
         entity.material = &_tileMaterial4;
+        entity.deferredMaterial = &_deferredTileMaterial1;
         entity.position = Vector3(0, 0, 0);
         _entities.push_back(entity);
     }
@@ -138,6 +188,7 @@ void Application::Init()
         Entity entity;
         entity.mesh = &_cubeMesh;
         entity.material = &_tileMaterial4;
+        entity.deferredMaterial = &_deferredTileMaterial1;
         entity.position = Vector3(0, 4, 0);
         _entities.push_back(entity);
     }
@@ -207,6 +258,7 @@ void Application::Update()
     _input.Update();
 
     if (_input.KeyPressed(SDL_SCANCODE_SPACE)) { _updateScene = !_updateScene; }
+    if (_input.KeyPressed(SDL_SCANCODE_G)) { _useDeferredShading = !_useDeferredShading; }
     if (_input.KeyPressed(SDL_SCANCODE_T)) { _showTangents = !_showTangents; }
     if (_input.KeyPressed(SDL_SCANCODE_R)) { _renderer.sortEnabled = !_renderer.sortEnabled; }
     if (_input.KeyPressed(SDL_SCANCODE_F))
@@ -220,11 +272,18 @@ void Application::Update()
     }
     if (_input.KeyPressed(SDL_SCANCODE_MINUS)) { _renderer.ignoreCount++; }
     if (_input.KeyPressed(SDL_SCANCODE_EQUALS)) { _renderer.ignoreCount = Math::Max(_renderer.ignoreCount - 1, 0); }
-    std::cout << "Ignoring: " << _renderer.ignoreCount << std::endl;
+    //std::cout << "Ignoring: " << _renderer.ignoreCount << std::endl;
 
     Simulate();
     RenderShadowMaps();
-    Render();
+    if (_useDeferredShading)
+    {
+        RenderDeferred();
+    }
+    else
+    {
+        RenderForward();
+    }
 
     SDL_GL_SwapWindow(_window);
 }
@@ -279,7 +338,6 @@ void Application::RenderShadowMaps()
         //Submit the drawcalls to the GPU
         shadowMap->framebuffer.Start();
 
-        glDepthMask(GL_TRUE);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glDisable(GL_CULL_FACE);
 
@@ -289,9 +347,53 @@ void Application::RenderShadowMaps()
     }
 }
 
-void Application::Render()
+void Application::RenderDeferred()
 {
-    glDepthMask(GL_TRUE);
+    _renderer.SetProjectionMatrix(Matrix4x4::Perspective(65, 16.0f / 9.0f, 0.01f, 1000));
+    _renderer.SetViewMatrix(_camera.GetViewMatrix());
+    _renderer.SetEyePosition(_camera.GetPosition());
+
+    for (auto& entity : _entities)
+    {
+        //Update sort key
+        entity.sortKey.UpdateDepth(
+            Vector3::DistanceSqr(_camera.GetPosition(), entity.position));
+        entity.sortKey.UpdatePass(0);
+
+        //Construct draw call
+        DrawCall drawCall;
+        entity.mesh->FillDrawCall(drawCall);
+        drawCall.pass = 0;
+        drawCall.material = entity.deferredMaterial;
+        drawCall.modelMatrix = Matrix4x4::FromTransform(
+            entity.position, entity.rotation, Vector3(entity.scale));
+
+        _renderer.Submit(entity.sortKey, drawCall);
+    }
+
+    //Render to GBuffer
+    _gbuffer.framebuffer.Start();
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glEnable(GL_CULL_FACE);
+    _renderer.Draw();
+    _gbuffer.framebuffer.Stop();
+
+
+    //Render contents of GBuffer
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glEnable(GL_CULL_FACE);
+
+    DrawCall drawCall;
+    _quad.FillDrawCall(drawCall);
+    drawCall.material = &_deferredLightMaterial;
+    drawCall.modelMatrix = Matrix4x4();
+
+    _renderer.Submit(SortKey(), drawCall);
+    _renderer.Draw();
+}
+
+void Application::RenderForward()
+{
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glEnable(GL_CULL_FACE);
     

@@ -13,6 +13,7 @@ struct Entity
 {
     StaticMesh* mesh;
     Material* material;
+    Material* deferredMaterial;
     SortKey sortKey;
 
     Vector3 position;

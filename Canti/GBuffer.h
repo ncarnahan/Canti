@@ -16,5 +16,4 @@ public:
     void Create(int width, int height);
 };
 
-
 #endif

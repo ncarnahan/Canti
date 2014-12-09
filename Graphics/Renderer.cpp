@@ -143,6 +143,8 @@ namespace Graphics
             glDrawElements(drawCall.drawMode, drawCall.size, GL_UNSIGNED_INT, 0);
         }
 
+        glDepthMask(GL_TRUE);
+
         _drawCalls.clear();
     }
 }

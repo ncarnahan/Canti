@@ -24,6 +24,7 @@ private:
     SDL_GLContext _context;
 
     bool _updateScene;
+    bool _useDeferredShading;
 
     GBuffer _gbuffer;
     Renderer _renderer;
@@ -64,6 +65,12 @@ private:
 
     Program _depthProgram;
     Material _depthMaterial;
+    
+    StaticMesh _quad;
+    Program _deferredLightProgram;
+    Material _deferredLightMaterial;
+    Program _deferredDiffuseProgram;
+    Material _deferredTileMaterial1;
 
     std::vector<Entity> _entities;
     std::vector<Light> _lights;
@@ -83,7 +90,8 @@ public:
 private:
     void Simulate();
     void RenderShadowMaps();
-    void Render();
+    void RenderDeferred();
+    void RenderForward();
 };
 
 #endif
