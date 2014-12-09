@@ -70,7 +70,9 @@ private:
     Program _deferredLightProgram;
     Material _deferredLightMaterial;
     Program _deferredDiffuseProgram;
+    Program _deferredSpecularProgram;
     Program _deferredBumpedDiffuseProgram;
+    Program _deferredBumpedSpecularProgram;
     Material _deferredTileMaterial1;
     Material _deferredTileMaterial2;
     Material _deferredTileMaterial3;

@@ -99,6 +99,7 @@ void Application::Init()
     
     _deferredLightProgram.LoadFromFiles("Data/DeferredLight.vert", "Data/DeferredLight.frag");
     _deferredDiffuseProgram.LoadFromFiles("Data/DeferredDiffuse.vert", "Data/DeferredDiffuse.frag");
+    _deferredSpecularProgram.LoadFromFiles("Data/DeferredSpecular.vert", "Data/DeferredSpecular.frag");
     _deferredBumpedDiffuseProgram.LoadFromFiles("Data/DeferredBumpedDiffuse.vert", "Data/DeferredBumpedDiffuse.frag");
     
     _roomMesh.LoadObjFile("Data/Room.obj");
@@ -167,10 +168,21 @@ void Application::Init()
     _deferredTileMaterial1.SetTexture("tex_diffuse", _tileTexture);
     _deferredTileMaterial1.useLighting = false;
 
+    _deferredTileMaterial2.SetProgram(_deferredSpecularProgram);
+    _deferredTileMaterial2.SetTexture("tex_diffuse", _tileTexture);
+    _deferredTileMaterial2.SetFloat("material.specularExponent", 100);
+    _deferredTileMaterial2.useLighting = false;
+
     _deferredTileMaterial3.SetProgram(_deferredBumpedDiffuseProgram);
     _deferredTileMaterial3.SetTexture("tex_diffuse", _tileTexture);
     _deferredTileMaterial3.SetTexture("tex_normal", _tileNormalTexture);
     _deferredTileMaterial3.useLighting = false;
+
+    _deferredTileMaterial4.SetProgram(_deferredBumpedDiffuseProgram);
+    _deferredTileMaterial4.SetTexture("tex_diffuse", _tileTexture);
+    _deferredTileMaterial4.SetTexture("tex_normal", _tileNormalTexture);
+    _deferredTileMaterial4.SetFloat("material.specularExponent", 100);
+    _deferredTileMaterial4.useLighting = false;
     
 
     
@@ -185,8 +197,8 @@ void Application::Init()
     {
         Entity entity;
         entity.mesh = &_roomMesh;
-        entity.material = &_tileMaterial3;
-        entity.deferredMaterial = &_deferredTileMaterial3;
+        entity.material = &_tileMaterial2;
+        entity.deferredMaterial = &_deferredTileMaterial2;
         entity.position = Vector3(0, 0, 0);
         _entities.push_back(entity);
     }
@@ -194,8 +206,8 @@ void Application::Init()
     {
         Entity entity;
         entity.mesh = &_cubeMesh;
-        entity.material = &_tileMaterial3;
-        entity.deferredMaterial = &_deferredTileMaterial3;
+        entity.material = &_tileMaterial2;
+        entity.deferredMaterial = &_deferredTileMaterial2;
         entity.position = Vector3(0, 4, 0);
         _entities.push_back(entity);
     }
@@ -244,7 +256,7 @@ void Application::Init()
         
         _shadowMaps[i].Init(light, _shadowMapTextures[i]);
         _shadowMaps[i].bias = 0.0005f;
-        _shadowMaps[i].strength = (_lights[i].type != LightType::Point) ? 1 : 0;
+        _shadowMaps[i].strength = (_lights[i].type != LightType::Point) ? 1.0f : 0.0f;
 
         _lights[i].shadowMap = &_shadowMaps[i];
     }

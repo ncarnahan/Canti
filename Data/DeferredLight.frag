@@ -65,6 +65,7 @@ void main() {
     //Light components
     vec3 ambient = light.ambient;
     vec3 diffuse = vec3(0);
+    vec3 specular = vec3(0);
     float shadowStrength = 0;
 
     if (light.type == 3) {  //Ambient light; deferred shading only
@@ -97,6 +98,17 @@ void main() {
 
             //Compute diffuse
             diffuse = light.intensity * light.color * NdotL * attenuation;
+
+            //Calculate specular
+            float specularExponent = texture(tex_color, v2f_uv).a * 255;
+            if (specularExponent > 0) {
+                vec3 eyeDir = normalize(in_eyePosition - worldPosition);
+                vec3 halfVec = normalize(lightDir + eyeDir);
+                float NdotH = dot(normalDir, halfVec);
+                if (NdotH > 0) {
+                    specular = diffuse * pow(NdotH, specularExponent);
+                }
+            }
         }
 
         if (shadow.strength > 0) {
@@ -119,7 +131,7 @@ void main() {
     }
 
     //Combine light components
-    vec3 lighting = diffuse * (1 - shadowStrength) + ambient;
+    vec3 lighting = (diffuse + specular) * (1 - shadowStrength) + ambient;
 
     out_color = texColor * lighting;
     // out_color = abs(texture(tex_normal, v2f_uv).rgb * 2 - vec3(1));
