@@ -159,7 +159,6 @@ void Application::Init()
     _deferredLightMaterial.SetTexture("tex_color", _gbuffer.colorTexture);
     _deferredLightMaterial.SetTexture("tex_normal", _gbuffer.normalTexture);
     _deferredLightMaterial.SetTexture("tex_depth", _gbuffer.depthTexture);
-    _deferredLightMaterial.useLighting = false;
 
     _deferredTileMaterial1.SetProgram(_deferredDiffuseProgram);
     _deferredTileMaterial1.SetTexture("tex_diffuse", _tileTexture);
@@ -178,7 +177,7 @@ void Application::Init()
     {
         Entity entity;
         entity.mesh = &_roomMesh;
-        entity.material = &_tileMaterial4;
+        entity.material = &_tileMaterial1;
         entity.deferredMaterial = &_deferredTileMaterial1;
         entity.position = Vector3(0, 0, 0);
         _entities.push_back(entity);
@@ -187,7 +186,7 @@ void Application::Init()
     {
         Entity entity;
         entity.mesh = &_cubeMesh;
-        entity.material = &_tileMaterial4;
+        entity.material = &_tileMaterial1;
         entity.deferredMaterial = &_deferredTileMaterial1;
         entity.position = Vector3(0, 4, 0);
         _entities.push_back(entity);
@@ -215,6 +214,12 @@ void Application::Init()
         _lights.push_back(light);
     }
 
+    {
+        Light light;
+        light.Point(Vector3(-2, 2, 0), Vector3(0, 0, 1), 2, 10);
+        _lights.push_back(light);
+    }
+
     //Create shadow map textures and framebuffers
     TextureLoadSettings depthMapSettings;
     depthMapSettings.clamp = TextureClamp::Clamp;
@@ -233,7 +238,10 @@ void Application::Init()
         _shadowMaps[i].bias = 0.0005f;
         _shadowMaps[i].strength = 1;
 
-        _lights[i].shadowMap = &_shadowMaps[i];
+        if (_lights[i].type != LightType::Point)
+        {
+            _lights[i].shadowMap = &_shadowMaps[i];
+        }
     }
 
     glEnable(GL_DEPTH_TEST);
@@ -383,12 +391,18 @@ void Application::RenderDeferred()
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glEnable(GL_CULL_FACE);
 
-    DrawCall drawCall;
-    _quad.FillDrawCall(drawCall);
-    drawCall.material = &_deferredLightMaterial;
-    drawCall.modelMatrix = Matrix4x4();
+    for (Light& light : _lights)
+    {
+        DrawCall drawCall;
+        _quad.FillDrawCall(drawCall);
+        drawCall.material = &_deferredLightMaterial;
+        drawCall.modelMatrix = Matrix4x4();
+        drawCall.light = &light;
+        drawCall.pass = 1;  //Additive
 
-    _renderer.Submit(SortKey(), drawCall);
+        _renderer.Submit(SortKey(), drawCall);
+    }
+    
     _renderer.Draw();
 }
 
