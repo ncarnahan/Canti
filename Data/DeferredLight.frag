@@ -6,6 +6,7 @@ uniform mat4 in_matrixModel;
 uniform mat4 in_matrixView;
 uniform mat4 in_matrixProj;
 uniform sampler2D tex_color;
+uniform sampler2D tex_specular;
 uniform sampler2D tex_normal;
 uniform sampler2D tex_depth;
 struct Light
@@ -100,14 +101,12 @@ void main() {
             diffuse = light.intensity * light.color * NdotL * attenuation;
 
             //Calculate specular
-            float specularExponent = texture(tex_color, v2f_uv).a * 255;
-            if (specularExponent > 0) {
-                vec3 eyeDir = normalize(in_eyePosition - worldPosition);
-                vec3 halfVec = normalize(lightDir + eyeDir);
-                float NdotH = dot(normalDir, halfVec);
-                if (NdotH > 0) {
-                    specular = diffuse * pow(NdotH, specularExponent);
-                }
+            vec3 eyeDir = normalize(in_eyePosition - worldPosition);
+            vec3 halfVec = normalize(lightDir + eyeDir);
+            float NdotH = dot(normalDir, halfVec);
+            if (NdotH > 0) {
+                vec4 texSpecular = texture(tex_specular, v2f_uv);
+                specular = texSpecular.rgb * diffuse * pow(NdotH, texSpecular.a * 255);
             }
         }
 
@@ -135,4 +134,5 @@ void main() {
 
     out_color = texColor * lighting;
     // out_color = abs(texture(tex_normal, v2f_uv).rgb * 2 - vec3(1));
+    // out_color = texture(tex_specular, v2f_uv).rgb;
 }

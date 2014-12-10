@@ -161,6 +161,7 @@ void Application::Init()
 
     _deferredLightMaterial.SetProgram(_deferredLightProgram);
     _deferredLightMaterial.SetTexture("tex_color", _gbuffer.colorTexture);
+    _deferredLightMaterial.SetTexture("tex_specular", _gbuffer.specularTexture);
     _deferredLightMaterial.SetTexture("tex_normal", _gbuffer.normalTexture);
     _deferredLightMaterial.SetTexture("tex_depth", _gbuffer.depthTexture);
 
@@ -170,6 +171,7 @@ void Application::Init()
 
     _deferredTileMaterial2.SetProgram(_deferredSpecularProgram);
     _deferredTileMaterial2.SetTexture("tex_diffuse", _tileTexture);
+    _deferredTileMaterial2.SetVector3("material.specularColor", Vector3(1, 0, 0));
     _deferredTileMaterial2.SetFloat("material.specularExponent", 100);
     _deferredTileMaterial2.useLighting = false;
 
@@ -181,6 +183,7 @@ void Application::Init()
     _deferredTileMaterial4.SetProgram(_deferredBumpedDiffuseProgram);
     _deferredTileMaterial4.SetTexture("tex_diffuse", _tileTexture);
     _deferredTileMaterial4.SetTexture("tex_normal", _tileNormalTexture);
+    _deferredTileMaterial4.SetVector3("material.specularColor", Vector3(1, 0, 0));
     _deferredTileMaterial4.SetFloat("material.specularExponent", 100);
     _deferredTileMaterial4.useLighting = false;
     

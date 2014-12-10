@@ -10,6 +10,7 @@ class GBuffer
 public:
     Texture depthTexture;
     Texture colorTexture;
+    Texture specularTexture;
     Texture normalTexture;
     Framebuffer framebuffer;
 

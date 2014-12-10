@@ -12,7 +12,8 @@ in vec3 v2f_tangent;
 in vec3 v2f_bitangent;
 in vec2 v2f_uv;
 
-out vec4 out_color;
+out vec3 out_color;
+out vec4 out_specular;
 out vec3 out_normal;
 
 void main() {
@@ -27,6 +28,7 @@ void main() {
         normalize(v2f_bitangent),
         normalize(v2f_normal));
 
-    out_color = vec4(texColor, 0);
+    out_color = texColor;
+    out_specular = vec4(0);
     out_normal = vec3(normalize(matrixInvTS * normalTS)) / 2 + vec3(0.5);
 }
