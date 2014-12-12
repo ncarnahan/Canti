@@ -30,5 +30,5 @@ void main() {
 
     out_color = texColor;
     out_specular = vec4(0);
-    out_normal = vec3(normalize(matrixInvTS * normalTS)) / 2 + vec3(0.5);
+    out_normal = normalize(matrixInvTS * normalTS);
 }

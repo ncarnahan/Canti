@@ -149,6 +149,7 @@ namespace Graphics
         {
         case TextureFormat::RGB:
         case TextureFormat::sRGB:
+        case TextureFormat::RGB16F:
             return GL_RGB;
         case TextureFormat::RGBA:
         case TextureFormat::sRGBA:

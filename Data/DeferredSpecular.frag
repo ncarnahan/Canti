@@ -13,7 +13,6 @@ struct Material
 };
 uniform Material material;
 
-in vec3 v2f_position;
 in vec3 v2f_normal;
 in vec2 v2f_uv;
 
@@ -26,5 +25,5 @@ void main() {
     vec3 texColor = texture(tex_diffuse, v2f_uv.st).rgb;
     out_color = texColor;
     out_specular = vec4(material.specularColor, material.specularExponent / 255);
-    out_normal = vec3(normalize(v2f_normal)) / 2 + vec3(0.5);
+    out_normal = normalize(v2f_normal);
 }

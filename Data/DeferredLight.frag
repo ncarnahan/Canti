@@ -48,7 +48,7 @@ vec3 reconstructWorldPosition() {
 void main() {
     vec3 worldPosition = reconstructWorldPosition();
     vec3 texColor = texture(tex_color, v2f_uv).rgb;
-    vec3 normalDir = texture(tex_normal, v2f_uv).rgb * 2 - vec3(1);
+    vec3 normalDir = texture(tex_normal, v2f_uv).rgb;
 
     vec3 lightDir;
     float lightDistance;
@@ -133,6 +133,6 @@ void main() {
     vec3 lighting = (diffuse + specular) * (1 - shadowStrength) + ambient;
 
     out_color = texColor * lighting;
-    // out_color = abs(texture(tex_normal, v2f_uv).rgb * 2 - vec3(1));
     // out_color = texture(tex_specular, v2f_uv).rgb;
+    // out_color = normalDir;
 }

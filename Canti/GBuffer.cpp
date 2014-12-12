@@ -9,7 +9,7 @@ void GBuffer::Create(int width, int height)
     depthTexture.Create(width, height, TextureFormat::Depth32, settings);
     colorTexture.Create(width, height, TextureFormat::sRGB, settings);
     specularTexture.Create(width, height, TextureFormat::sRGBA, settings);
-    normalTexture.Create(width, height, TextureFormat::RGB, settings);
+    normalTexture.Create(width, height, TextureFormat::RGB16F, settings);
 
 
     RenderTarget targets[4];

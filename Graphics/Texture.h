@@ -14,6 +14,7 @@ namespace Graphics
         Depth16 = GL_DEPTH_COMPONENT16,
         Depth24 = GL_DEPTH_COMPONENT24,
         Depth32 = GL_DEPTH_COMPONENT32,
+        RGB16F = GL_RGB16F,
     };
 
     enum class TextureFilter

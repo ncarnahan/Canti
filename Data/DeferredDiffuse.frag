@@ -6,7 +6,6 @@ uniform mat4 in_matrixView;
 uniform mat4 in_matrixProj;
 uniform sampler2D tex_diffuse;
 
-in vec3 v2f_position;
 in vec3 v2f_normal;
 in vec2 v2f_uv;
 
@@ -19,5 +18,5 @@ void main() {
     vec3 texColor = texture(tex_diffuse, v2f_uv.st).rgb;
     out_color = texColor;
     out_specular = vec4(0);
-    out_normal = vec3(normalize(v2f_normal)) / 2 + vec3(0.5);
+    out_normal = normalize(v2f_normal);
 }
