@@ -1,5 +1,6 @@
 #include "Shader.h"
 #include <iostream>
+#include <string>
 #include <Utils/File.h>
 using namespace Utils;
 
@@ -36,9 +37,9 @@ namespace Graphics
     bool Shader::LoadFromFile(ShaderType type, const char* fileName)
     {
         //Read source
-        auto contents = File::ReadAllText(fileName);
+        std::string contents = File::ReadAllText(fileName);
 
-        return LoadFromString(type, contents->c_str());
+        return LoadFromString(type, contents.c_str());
     }
 
     bool Shader::LoadFromString(ShaderType type, const char* source)
